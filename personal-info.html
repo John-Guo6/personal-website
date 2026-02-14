@@ -1,14 +1,14 @@
 <!doctype html>
 <html>
   <head>
-    <title>Home | My Personal Website</title>
+    <title>Personal Info | My Personal Website</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
       body {
         margin: 0;
-        font-family: Lucida Console", "Courier New", monospace;
+        font-family: "Lucida Console", "Courier New", monospace;
       }
 
       .topnav {
@@ -40,8 +40,6 @@
         display: none;
       }
 
-
-
       @media screen and (max-width: 600px) {
         .topnav a:not(:first-child) {display: none;}
         .topnav a.icon {
@@ -64,24 +62,25 @@
         }
       }
 
-      li {
+      .dropdown {
         float: left;
+        overflow: hidden;
       }
 
-      li a, .dropbtn {
-        display: inline-block;
+      .dropdown .dropbtn {
+        font-size: 17px;
+        border: none;
+        outline: none;
         color: white;
-        text-align: center;
-        padding: 20px 20px;
-        text-decoration: none;
+        padding: 14px 16px;
+        background-color: inherit;
+        font-family: inherit;
+        margin: 0;
+        cursor: pointer;
       }
 
-      li a:hover, .dropdown:hover .dropbtn {
+      .topnav a:hover, .dropdown:hover .dropbtn {
         background-color: red;
-      }
-
-      li.dropdown {
-        display: inline-block;
       }
 
       .dropdown-content {
@@ -89,11 +88,12 @@
         position: absolute;
         background-color: #f9f9f9;
         min-width: 160px;
-        box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.2);
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
       }
 
       .dropdown-content a {
+        float: none;
         color: black;
         padding: 12px 16px;
         text-decoration: none;
@@ -101,7 +101,9 @@
         text-align: left;
       }
 
-      .dropdown-content a:hover {background-color: #f1f1f1;}
+      .dropdown-content a:hover {
+        background-color: #ddd;
+      }
 
       .dropdown:hover .dropdown-content {
         display: block;
@@ -159,24 +161,31 @@
       p1{padding-left: 20px;}
       #p1 {background-color:rgb(255, 0, 0);opacity:0.8;}
 
+      .img-right {
+        float: right;
+        width: 220px;
+        height: 160px;
+      }
     </style>
   </head>
   <body>
     <div class="topnav" id="myTopnav">
-      <a href="Home.html">Home</a>
-      <a href="Personal.html" class="active">Personal Information</a>
-      <a href="Contact.html">Contact</a>
+      <a href="index.html">Home</a>
+      <a href="personal-info.html" class="active">Personal Information</a>
+      <a href="contact.html">Contact</a>
+      <div class="dropdown">
+        <button class="dropbtn">Quick Guide 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="#person-info">Personal Info(Detail)</a>
+          <a href="#hobby">Hobbies</a>
+          <a href="#work-experience">Work Experience</a>
+        </div>
+      </div>
       <a href="javascript:void(0);" class="icon" onclick="myFunction()">
         <i class="fa fa-bars"></i>
       </a>
-      <li class="dropdown">
-        <a href="javascript:void(0)" class="dropbtn">Quick Guide</a>
-        <div class="dropdown-content">
-          <a href="Personal.html">Personal Info(Detail)</a>
-          <a href="Personal.html">Hobbies</a>
-          <a href="Personal.html">Work Experience</a>
-        </div>
-      </li>
     </div>
 
     <script>
@@ -190,7 +199,7 @@
       }
     </script>
 
-    <h1 id="person info">Detail Personal Information</h1>
+    <h1 id="person-info">Detail Personal Information</h1>
 
     <table>
       <tr>
@@ -221,12 +230,13 @@
         <th>Education</th>
         <td>Year 4 in BBA in LN University</td>
       </tr>
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrch8BuXMUAl8L5oD3DwHFUk3iCBAI7S7Y4g&s"
-        alt="LN University logo"
-        style="width: 220px; height: 160px; float: right"
-      />
     </table>
+    
+    <img
+      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrch8BuXMUAl8L5oD3DwHFUk3iCBAI7S7Y4g&s"
+      alt="LN University logo"
+      class="img-right"
+    />
 
     <h2 id="hobby">Hobbies</h2>
     <ol class="g">
@@ -235,21 +245,22 @@
       <li>Sleep</li>
       <li>Listen to Music</li>
     </ol>
-    <p id="p1" style="color:white;" >My favourite soccer team in Arsenal. I like the way they attack, forward, forward and forward. Coach Wenger turned the game into art, which is why I fell in love with this club..</p>
-    <h3 id="work experience">Work Experience</h3>
+    <p id="p1" style="color:white;">My favourite soccer team is Arsenal. I like the way they attack, forward, forward and forward. Coach Wenger turned the game into art, which is why I fell in love with this club.</p>
+    
+    <h3 id="work-experience">Work Experience</h3>
     <table>
       <tr>
         <th>Year</th>
         <th>Company</th>
       </tr>
       <tr>
-        <td>2023-06-01 to 2023-07-1</td>
+        <td>2023-06-01 to 2023-07-01</td>
         <td>Zhejiang Chouzhou Commercial Bank</td>
       </tr>
       <tr>
         <td>2025-06-30 to 2025-07-31</td>
         <td>Jiangsu Provincial Data Group</td>
       </tr>
-      </table>
+    </table>
   </body>
 </html>
