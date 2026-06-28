@@ -394,6 +394,8 @@ function migrateData(data) {
 // ===== localStorage =====
 function saveData() {
   localStorage.setItem('siteDataV2', JSON.stringify(currentData));
+  // 自动备份
+  localStorage.setItem('siteDataV2_backup', JSON.stringify(currentData));
 }
 
 function mergeData(defaults, saved) {
@@ -915,6 +917,52 @@ document.getElementById('modal-dedup').addEventListener('click', function(e) {
 document.getElementById('modal-subcat-editor').addEventListener('click', function(e) {
   if (e.target === this) closeSubcatModal();
 });
+
+// ===== Data Recovery =====
+function recoverData() {
+  const backup = localStorage.getItem('siteDataV2_backup');
+  // Also check old key
+  const oldData = localStorage.getItem('siteData');
+  
+  if (!backup && !oldData) {
+    alert('⚠️ 没有可恢复的备份数据');
+    return;
+  }
+
+  let sources = [];
+  if (backup) {
+    try { JSON.parse(backup); sources.push('自动备份 (siteDataV2_backup)'); } catch(e) {}
+  }
+  if (oldData) {
+    try { JSON.parse(oldData); sources.push('旧数据 (siteData)'); } catch(e) {}
+  }
+
+  if (sources.length === 0) {
+    alert('⚠️ 备份数据损坏，无法恢复');
+    return;
+  }
+
+  const msg = '找到以下备份：\n\n' + sources.map((s, i) => (i+1) + '. ' + s).join('\n') + '\n\n输入数字选择恢复来源，或点取消：';
+  const choice = prompt(msg, '1');
+  if (!choice) return;
+
+  let raw;
+  if (choice === '2' && oldData) raw = oldData;
+  else raw = backup;
+
+  if (!raw) { alert('⚠️ 无效选择'); return; }
+
+  try {
+    const data = JSON.parse(raw);
+    const migrated = migrateData(data);
+    currentData = mergeData(defaultData, migrated);
+    saveData();
+    renderAll();
+    alert('✅ 数据已恢复！');
+  } catch(e) {
+    alert('❌ 恢复失败：数据损坏');
+  }
+}
 
 // ===== Init =====
 currentData = loadData();
