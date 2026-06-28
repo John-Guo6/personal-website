@@ -127,6 +127,19 @@ main {
 /* Drop zone highlight */
 .subcat.drop-target { outline: 2px dashed var(--accent-blue); outline-offset: 2px; border-radius: 4px; }
 .subcat.drop-target .subcat-header { border-color: var(--accent-blue); }
+/* Collapse */
+.subcat-collapse-btn {
+  cursor: pointer; font-size: 12px; color: var(--text-secondary);
+  margin-right: 6px; transition: transform 0.2s; user-select: none;
+}
+.subcat-collapse-btn:hover { color: var(--text-primary); }
+.subcat.collapsed .subcat-collapse-btn { transform: rotate(-90deg); }
+.subcat.collapsed .subcat-content { display: none; }
+.subcat-eye-btn {
+  cursor: pointer; font-size: 14px; color: var(--text-secondary);
+  margin-right: 6px; user-select: none;
+}
+.subcat-eye-btn:hover { color: var(--accent-yellow); }
 .card-actions { opacity: 0; display: flex; gap: 2px; transition: opacity 0.2s; flex-shrink: 0; }
 .card:hover .card-actions { opacity: 1; }
 .btn-eye, .btn-edit, .btn-delete {
@@ -555,6 +568,8 @@ function renderSubcatHeader(sc, cat, isFirst, isLast) {
     + '</div>';
 
   return '<div class="subcat-header">'
+    + '<span class="subcat-collapse-btn" onclick="toggleCollapse(event, \'' + cat + '\', \'' + sc.id + '\')">▼</span>'
+    + '<span class="subcat-eye-btn" onclick="toggleSubcatShowNames(event, \'' + cat + '\', \'' + sc.id + '\')" title="切换子分类下所有名称显隐">👁️</span>'
     + '<span class="subcat-name">' + escapeHtml(sc.name) + '</span>'
     + actionsHtml
     + '</div>';
@@ -575,6 +590,7 @@ function renderCategory(category) {
 
     html += '<div class="subcat" data-subcat-id="' + sc.id + '" data-cat="' + category + '" >';
     html += renderSubcatHeader(sc, category, isFirst, isLast);
+    html += '<div class="subcat-content">';
 
     // Links
     const hasLinks = sc.links.length > 0;
@@ -592,7 +608,8 @@ function renderCategory(category) {
       hasAnyItem = true;
     }
 
-    html += '</div>';
+    html += '</div>'; // subcat-content
+    html += '</div>'; // subcat
   }
 
   // Add subcategory button
@@ -649,6 +666,33 @@ function renderAll() {
   }
 }
 
+function toggleCollapse(e, cat, scId) {
+  e.stopPropagation();
+  e.preventDefault();
+  var scEl = document.querySelector('.subcat[data-subcat-id="' + scId + '"]');
+  if (scEl) scEl.classList.toggle('collapsed');
+}
+
+function toggleSubcatShowNames(e, cat, scId) {
+  e.stopPropagation();
+  e.preventDefault();
+  var sc = findSubcategory(cat, scId);
+  if (!sc) return;
+  // Check if all are currently showing
+  var allShowing = true;
+  var items = sc.links.concat(sc.projects);
+  if (items.length === 0) return;
+  for (var i = 0; i < items.length; i++) {
+    if (!items[i].showName) { allShowing = false; break; }
+  }
+  var newVal = !allShowing;
+  for (var i = 0; i < items.length; i++) {
+    items[i].showName = newVal;
+  }
+  saveData();
+  renderCategory(cat);
+}
+
 function toggleShowName(id) {
   const found = findItem(id);
   if (!found) return;
@@ -690,6 +734,17 @@ function onPanelDragEnd(e) {
   document.querySelectorAll('.card.dragging').forEach(function(el) { el.classList.remove('dragging'); });
 }
 
+// Find where to insert in same-subcat drag reorder
+function getDropInsertIndex(clientY, scEl, type) {
+  var cards = scEl.querySelectorAll('.card[data-type="' + type + '"]');
+  if (!cards.length) return 0;
+  for (var i = 0; i < cards.length; i++) {
+    var rect = cards[i].getBoundingClientRect();
+    if (clientY < rect.top + rect.height / 2) return i;
+  }
+  return cards.length;
+}
+
 function clearDragHighlight() {
   if (dragHighlightEl) {
     dragHighlightEl.classList.remove('drop-target');
@@ -724,23 +779,37 @@ function onTabDrop(e) {
   e.preventDefault();
   clearDragHighlight();
   var sc = closestSubcat(e.target);
-  if (!sc) return;
+  if (!sc || !dragItemId || !dragItemData) return;
 
   var targetCat = sc.dataset.cat;
   var targetScId = sc.dataset.subcatId;
 
-  if (!dragItemId || !dragItemData) return;
-  if (dragSourceCat === targetCat && dragSourceScId === targetScId) return;
+  // Only same main category
   if (dragSourceCat !== targetCat) return;
 
-  var sourceSc = findSubcategory(dragSourceCat, dragSourceScId);
-  if (sourceSc) {
-    var idx = sourceSc[dragSourceType].findIndex(function(item) { return item.id === dragItemId; });
-    if (idx !== -1) sourceSc[dragSourceType].splice(idx, 1);
-  }
-
   var targetSc = findSubcategory(targetCat, targetScId);
-  if (targetSc) {
+  if (!targetSc) return;
+
+  var isSameSc = dragSourceCat === targetCat && dragSourceScId === targetScId;
+
+  if (isSameSc) {
+    // Reorder within same subcategory
+    var arr = targetSc[dragSourceType];
+    var oldIdx = arr.findIndex(function(item) { return item.id === dragItemId; });
+    if (oldIdx === -1) return;
+
+    // Find insert position based on drop Y
+    var insertIdx = getDropInsertIndex(e.clientY, sc, dragSourceType);
+    arr.splice(oldIdx, 1);
+    if (insertIdx > oldIdx) insertIdx--;
+    arr.splice(insertIdx, 0, dragItemData);
+  } else {
+    // Move to different subcategory
+    var sourceSc = findSubcategory(dragSourceCat, dragSourceScId);
+    if (sourceSc) {
+      var idx = sourceSc[dragSourceType].findIndex(function(item) { return item.id === dragItemId; });
+      if (idx !== -1) sourceSc[dragSourceType].splice(idx, 1);
+    }
     targetSc[dragSourceType].push(dragItemData);
   }
 
