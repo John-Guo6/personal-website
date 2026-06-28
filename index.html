@@ -653,6 +653,13 @@ function bindCardEvents(panel) {
   });
 }
 
+function renderAll() {
+  for (var i = 0; i < 4; i++) {
+    var cat = ['school', 'work', 'life', 'ai'][i];
+    renderCategory(cat);
+  }
+}
+
 function toggleShowName(id) {
   const found = findItem(id);
   if (!found) return;
@@ -991,7 +998,7 @@ function importData(input) {
       renderAll();
       alert('✅ 导入成功！');
     } catch(err) {
-      alert('❌ 导入失败：文件格式不正确');
+      alert('❌ 导入失败：' + err.message);
     }
   };
   reader.readAsText(file);
