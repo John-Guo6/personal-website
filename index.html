@@ -608,7 +608,10 @@ function renderCategory(category) {
   // Bind card events
   bindCardEvents(panel);
   // Bind drag delegation
+  // One-time drag delegation setup
   if (!panel._dragBound) {
+    panel.addEventListener('dragstart', onPanelDragStart);
+    panel.addEventListener('dragend', onPanelDragEnd);
     panel.addEventListener('dragover', onTabDragOver);
     panel.addEventListener('drop', onTabDrop);
     panel._dragBound = true;
@@ -616,20 +619,6 @@ function renderCategory(category) {
 }
 
 function bindCardEvents(panel) {
-  // Drag events on cards
-  panel.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('dragstart', function(e) {
-      const id = this.dataset.id;
-      const cat = this.dataset.cat;
-      const scId = this.dataset.subcatId;
-      const type = this.dataset.type;
-      const found = findItem(id);
-      if (!found) return;
-      handleDragStart.call(this, e, id, cat, scId, type, found.item);
-    });
-    card.addEventListener('dragend', handleDragEnd);
-  });
-
   panel.querySelectorAll('.btn-eye').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -676,19 +665,28 @@ var dragSourceType = null;
 var dragItemData = null;
 var dragHighlightEl = null;
 
-function handleDragStart(e, id, cat, scId, type, item) {
+function onPanelDragStart(e) {
+  var card = e.target.closest('.card');
+  if (!card) return;
+  var id = card.dataset.id;
+  var cat = card.dataset.cat;
+  var scId = card.dataset.subcatId;
+  var type = card.dataset.type;
+  var found = findItem(id);
+  if (!found) return;
   dragItemId = id;
   dragSourceCat = cat;
   dragSourceScId = scId;
   dragSourceType = type;
-  dragItemData = item;
-  this.classList.add('dragging');
+  dragItemData = found.item;
+  card.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', id);
 }
 
-function handleDragEnd(e) {
-  this.classList.remove('dragging');
+function onPanelDragEnd(e) {
+  var card = e.target.closest('.card');
+  if (card) card.classList.remove('dragging');
   clearDragHighlight();
 }
 
