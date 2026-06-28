@@ -58,6 +58,7 @@ https://objectstorage.ap-singapore-1.oraclecloud.com/n/ax9xub0hkknv/b/JohnG-pers
 https://github.com/John-Guo6/personal-website
 
 ## 已完成的里程碑
+- [x] 名称URL去重 + 名称显隐 + 自定义子分类排序 (2026-06-29)
 
 - [x] 网站搭建（HTML/CSS/JS 单文件）
 - [x] 暗色主题 + 卡片式布局
@@ -73,6 +74,7 @@ https://github.com/John-Guo6/personal-website
 - [ ] 将本地脚本上传至 GitHub 后添加到项目区
 
 ## 会话记录
+| 2026-06-29 | Default | 新增三大功能：名称/URL去重 + 名称显隐 + 自定义子分类排序 |
 
 | 日期 | 模式 / Skill | 重要变更 |
 |------|-------------|---------|
@@ -82,3 +84,26 @@ https://github.com/John-Guo6/personal-website
 | 2026-06-28 | - | OCI Object Storage 部署 |
 | 2026-06-28 | - | GitHub Actions 自动部署 |
 | 2026-06-28 | - | 添加 AI 分类 + 记忆规则 |
+| 2026-06-28 | $using-superpowers | 会话启动，检查 memory-recorder 触发 |
+
+## 功能二 - 新增功能（2026-06-29）
+
+### 名称 + URL 去重
+- 全局跨分类去重
+- 名称重复 → 自动生成编号（笔趣阁→笔趣阁1→笔趣阁2）
+- 二次确认弹窗：显示自动生成名称，确认使用或自行填写
+- URL 重复 → 警告"你已添加该网站"
+
+### 名称显隐
+- 新增链接/项目时可选择是否展示名称（默认展示）
+- 卡片上 👁️ 眼睛图标切换显示/隐藏
+- 隐藏时名称显示为 `***`
+
+### 自定义子分类
+- 每个大分类下可自建子分类（默认"默认"子分类不可删除/重命名）
+- 子分类支持 ↑↓ 排序
+- 链接/项目挂在子分类下
+
+### 数据迁移
+- 旧格式（V1: `{links, projects}`）自动迁移到新格式（V2: `{subcategories: [...]}`）
+- localStorage key 从 `siteData` 迁移到 `siteDataV2`

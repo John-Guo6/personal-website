@@ -17,6 +17,7 @@
   --accent-green: #3fb950;
   --accent-red: #f85149;
   --tab-active: #1f6feb;
+  --accent-yellow: #d29922;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -25,6 +26,7 @@ body {
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
   min-height: 100vh;
   line-height: 1.5;
+  padding-bottom: 100px;
 }
 
 /* ===== Header ===== */
@@ -34,256 +36,198 @@ header {
   padding: 24px 32px;
   text-align: center;
 }
-header h1 {
-  font-size: 22px;
-  color: var(--accent-blue);
-}
-header .tagline {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 6px;
-}
+header h1 { font-size: 22px; color: var(--accent-blue); }
+header .tagline { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
 
 /* ===== Navigation Tabs ===== */
 nav {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  padding: 14px 0 0 0;
-  background: var(--bg-primary);
+  display: flex; justify-content: center; gap: 4px;
+  padding: 14px 0 0 0; background: var(--bg-primary);
 }
 .tab {
-  padding: 8px 24px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-family: inherit;
-  border-radius: 8px 8px 0 0;
-  transition: all 0.2s;
+  padding: 8px 24px; font-size: 14px; color: var(--text-secondary);
+  cursor: pointer; border: none; background: none; font-family: inherit;
+  border-radius: 8px 8px 0 0; transition: all 0.2s;
 }
 .tab:hover { color: var(--text-primary); }
-.tab.active {
-  background: var(--tab-active);
-  color: #fff;
-  font-weight: bold;
-}
+.tab.active { background: var(--tab-active); color: #fff; font-weight: bold; }
 
-/* ===== Content Area ===== */
+/* ===== Content ===== */
 main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0;
+  max-width: 780px; margin: 0 auto; padding: 0;
   border-top: 2px solid var(--tab-active);
 }
 .tab-panel { display: none; padding: 24px 32px 16px; }
 .tab-panel.active { display: block; }
 
-/* ===== Sub Sections ===== */
-.sub-section { margin-bottom: 28px; }
-.sub-section.empty { display: none; }
-.sub-section h3 {
-  font-size: 15px;
-  color: var(--text-primary);
-  margin-bottom: 12px;
+/* ===== Subcategory ===== */
+.subcat { margin-bottom: 24px; }
+.subcat-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.subcat-header .subcat-name {
+  font-size: 14px; color: var(--accent-yellow); font-weight: bold;
+}
+.subcat-header .subcat-actions { display: flex; gap: 2px; margin-left: auto; opacity: 0; transition: opacity 0.2s; }
+.subcat-header:hover .subcat-actions { opacity: 1; }
+.subcat-header .btn-subcat {
+  background: none; border: 1px solid var(--border); color: var(--text-secondary);
+  cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px;
+  font-family: inherit; transition: all 0.15s;
+}
+.subcat-header .btn-subcat:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.btn-subcat.move { color: var(--accent-blue); }
+.btn-subcat.delete { color: var(--accent-red); }
+.btn-subcat:disabled { opacity: 0.3; cursor: default; }
+
+.btn-add-subcat {
+  display: block; width: 100%; background: none; border: 2px dashed var(--border);
+  color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 10px;
+  border-radius: 8px; font-family: inherit; margin-bottom: 8px; transition: all 0.2s;
+}
+.btn-add-subcat:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+.subcat-type-label {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 6px; margin-top: 8px;
+  display: flex; align-items: center; gap: 4px;
 }
 
 /* ===== Cards ===== */
 .card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 6px;
+  text-decoration: none; color: inherit; transition: all 0.2s;
 }
-.card:hover {
-  border-color: var(--accent-blue);
-  box-shadow: 0 2px 8px rgba(88,166,255,0.15);
-}
+.card:hover { border-color: var(--accent-blue); box-shadow: 0 2px 8px rgba(88,166,255,0.15); }
 .card-icon { font-size: 18px; flex-shrink: 0; }
 .card-body { flex: 1; min-width: 0; }
-.card-name {
-  display: block;
-  font-size: 14px;
-  color: var(--text-primary);
-}
+.card-name { display: block; font-size: 14px; color: var(--text-primary); }
+.card-name.hidden-name { color: var(--text-muted); font-style: italic; }
 .card-url {
-  display: block;
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block; font-size: 11px; color: var(--text-secondary);
+  margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .card-tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #21262d;
-  color: var(--text-secondary);
-  flex-shrink: 0;
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  background: #21262d; color: var(--text-secondary); flex-shrink: 0;
 }
 .card-tag.project { color: var(--accent-green); }
-.card-arrow {
-  color: var(--text-secondary);
-  font-size: 16px;
-  flex-shrink: 0;
-}
-.card-actions {
-  opacity: 0;
-  display: flex;
-  gap: 4px;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
+.card-arrow { color: var(--text-secondary); font-size: 16px; flex-shrink: 0; }
+.card-actions { opacity: 0; display: flex; gap: 2px; transition: opacity 0.2s; flex-shrink: 0; }
 .card:hover .card-actions { opacity: 1; }
-.btn-edit, .btn-delete {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-  font-family: inherit;
+.btn-eye, .btn-edit, .btn-delete {
+  background: none; border: none; cursor: pointer; font-size: 14px;
+  padding: 2px 4px; font-family: inherit;
 }
+.btn-eye { color: var(--accent-yellow); }
 .btn-edit { color: var(--accent-blue); }
 .btn-delete { color: var(--accent-red); }
-.btn-edit:hover, .btn-delete:hover { opacity: 0.8; }
+.btn-eye:hover, .btn-edit:hover, .btn-delete:hover { opacity: 0.8; }
 
 /* ===== Empty State ===== */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-  font-size: 14px;
-}
+.empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 14px; }
 
 /* ===== Floating Add Button ===== */
 .fab {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--tab-active);
-  color: #fff;
-  font-size: 28px;
-  border: none;
-  cursor: pointer;
+  position: fixed; bottom: 24px; right: 24px; width: 52px; height: 52px;
+  border-radius: 50%; background: var(--tab-active); color: #fff;
+  font-size: 28px; border: none; cursor: pointer;
   box-shadow: 0 4px 16px rgba(31,111,235,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s; z-index: 100;
 }
 .fab:hover { transform: scale(1.1); }
 
 /* ===== Modal ===== */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
 }
 .modal-overlay.hidden { display: none; }
 .modal {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  width: 400px;
-  max-width: calc(100% - 32px);
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; width: 420px; max-width: calc(100% - 32px);
+  max-height: 90vh; overflow-y: auto;
 }
-.modal h3 {
-  font-size: 16px;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-}
+.modal h3 { font-size: 16px; color: var(--text-primary); margin-bottom: 20px; }
 .modal label {
-  display: block;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  margin-top: 14px;
+  display: block; font-size: 12px; color: var(--text-secondary);
+  margin-bottom: 6px; margin-top: 12px;
 }
 .modal label:first-of-type { margin-top: 0; }
 .modal select, .modal input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
+  width: 100%; padding: 10px 12px; background: var(--bg-primary);
+  border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);
+  font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s;
 }
-.modal select:focus, .modal input:focus {
-  border-color: var(--accent-blue);
-}
+.modal select:focus, .modal input:focus { border-color: var(--accent-blue); }
 .modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;
 }
 .modal-actions button {
-  padding: 8px 20px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  border: none;
+  padding: 8px 20px; border-radius: 6px; font-size: 13px;
+  cursor: pointer; font-family: inherit; border: none;
 }
-#modal-cancel {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-primary);
+.btn-cancel { background: transparent; border: 1px solid var(--border) !important; color: var(--text-primary); }
+.btn-save { background: #238636; color: #fff; }
+.btn-save:hover { background: #2ea043; }
+.btn-danger { background: #da3633; color: #fff; }
+.btn-danger:hover { background: #f85149; }
+
+/* Toggle switch */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding: 8px 0;
 }
-#modal-save {
-  background: #238636;
-  color: #fff;
+.toggle-row label { margin: 0; }
+.toggle-switch {
+  position: relative; width: 44px; height: 24px;
 }
-#modal-save:hover { background: #2ea043; }
+.toggle-switch input { display: none; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--border); border-radius: 24px;
+  cursor: pointer; transition: all 0.3s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: all 0.3s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--tab-active); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* Dedup warning in modal */
+.dedup-warning {
+  background: rgba(210,153,34,0.15); border: 1px solid var(--accent-yellow);
+  border-radius: 6px; padding: 10px 14px; margin-top: 12px;
+  font-size: 13px; color: var(--accent-yellow);
+}
+.dedup-warning .auto-name { font-weight: bold; color: var(--accent-green); }
 
 /* ===== Footer ===== */
 footer {
-  text-align: center;
-  padding: 16px 32px;
-  border-top: 1px solid #21262d;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 20px;
+  text-align: center; padding: 16px 32px; border-top: 1px solid #21262d;
+  font-size: 11px; color: var(--text-muted); margin-top: 20px;
+}
+footer button {
+  background: none; border: 1px solid var(--border); color: var(--text-secondary);
+  padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: inherit;
+  font-size: 11px; margin-left: 8px;
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
   body { font-size: 14px; }
   header { padding: 16px; }
-  nav {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    padding: 8px 16px;
-  }
+  nav { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; justify-content: flex-start; padding: 8px 16px; }
   .tab { padding: 8px 16px; font-size: 13px; }
   .tab-panel { padding: 16px; }
-  .card { padding: 10px 14px; }
+  .card { padding: 10px 12px; }
   .card-actions { opacity: 1; }
+  .subcat-header .subcat-actions { opacity: 1; }
   .modal { width: calc(100% - 32px); padding: 20px; }
   .fab { bottom: 16px; right: 16px; width: 48px; height: 48px; font-size: 24px; }
 }
@@ -291,13 +235,11 @@ footer {
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <h1>guozikang</h1>
   <p class="tagline">&gt; 开发者 · 终身学习者</p>
 </header>
 
-<!-- Tab Navigation -->
 <nav>
   <button class="tab active" data-category="school" onclick="switchTab('school')">🎓 学校</button>
   <button class="tab" data-category="work" onclick="switchTab('work')">💼 工作</button>
@@ -305,50 +247,17 @@ footer {
   <button class="tab" data-category="ai" onclick="switchTab('ai')">🤖 AI</button>
 </nav>
 
-<!-- Content -->
 <main>
-  <section id="tab-school" class="tab-panel active">
-    <div class="sub-section" id="school-links">
-      <h3>🔗 外部链接</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="sub-section" id="school-projects">
-      <h3>🐙 我的项目</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="empty-state" id="school-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
-  </section>
-
-  <section id="tab-work" class="tab-panel">
-    <div class="sub-section" id="work-links">
-      <h3>🔗 外部链接</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="sub-section" id="work-projects">
-      <h3>🐙 我的项目</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="empty-state" id="work-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
-  </section>
-
-  <section id="tab-life" class="tab-panel">
-    <div class="sub-section" id="life-links">
-      <h3>🔗 外部链接</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="sub-section" id="life-projects">
-      <h3>🐙 我的项目</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="empty-state" id="life-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
-  </section>
+  <section id="tab-school" class="tab-panel active"></section>
+  <section id="tab-work" class="tab-panel"></section>
+  <section id="tab-life" class="tab-panel"></section>
+  <section id="tab-ai" class="tab-panel"></section>
 </main>
 
-<!-- Floating Add Button -->
 <button id="add-btn" class="fab" title="添加链接" onclick="openAddModal()">+</button>
 
-<!-- Modal -->
-<div id="modal-overlay" class="modal-overlay hidden">
+<!-- Main Add/Edit Modal -->
+<div id="modal-main" class="modal-overlay hidden">
   <div class="modal">
     <h3 id="modal-title">➕ 添加链接</h3>
     <label for="modal-category">所属分类</label>
@@ -358,6 +267,8 @@ footer {
       <option value="life">🌈 生活</option>
       <option value="ai">🤖 AI</option>
     </select>
+    <label for="modal-subcat">子分类</label>
+    <select id="modal-subcat"></select>
     <label for="modal-type">类型</label>
     <select id="modal-type">
       <option value="links">🔗 外部链接</option>
@@ -365,88 +276,167 @@ footer {
     </select>
     <label for="modal-name">名称</label>
     <input id="modal-name" type="text" placeholder="链接名称" required>
+    <div id="modal-name-warning" class="dedup-warning" style="display:none;"></div>
     <label for="modal-url">URL</label>
     <input id="modal-url" type="text" placeholder="https://..." required>
+    <div class="toggle-row">
+      <label>👁️ 显示名称</label>
+      <label class="toggle-switch">
+        <input id="modal-show-name" type="checkbox" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
     <div class="modal-actions">
-      <button id="modal-cancel" type="button" onclick="closeModal()">取消</button>
-      <button id="modal-save" type="button" onclick="handleSave()">保存</button>
+      <button class="btn-cancel" onclick="closeMainModal()">取消</button>
+      <button class="btn-save" onclick="handleSave()">保存</button>
     </div>
   </div>
 </div>
 
+<!-- Dedup Confirmation Modal -->
+<div id="modal-dedup" class="modal-overlay hidden">
+  <div class="modal" style="text-align:center;">
+    <h3>⚠️ 名称已被使用</h3>
+    <p style="margin-bottom:12px;color:var(--text-secondary);">系统已自动生成名称：</p>
+    <p style="font-size:18px;font-weight:bold;color:var(--accent-green);margin-bottom:16px;" id="dedup-auto-name"></p>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">确认使用自动生成的名称？</p>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-cancel" onclick="dedupUseCustom()">自行填写</button>
+      <button class="btn-save" onclick="dedupUseAuto()">使用自动名称</button>
+    </div>
+  </div>
+</div>
 
-  <section id="tab-ai" class="tab-panel">
-    <div class="sub-section" id="ai-links">
-      <h3>🔗 外部链接</h3>
-      <div class="card-list"></div>
+<!-- Subcategory Add/Rename Modal -->
+<div id="modal-subcat" class="modal-overlay hidden">
+  <div class="modal">
+    <h3 id="subcat-modal-title">➕ 新增子分类</h3>
+    <label for="subcat-name-input">子分类名称</label>
+    <input id="subcat-name-input" type="text" placeholder="输入子分类名称" required>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSubcatModal()">取消</button>
+      <button class="btn-save" onclick="handleSubcatSave()">保存</button>
     </div>
-    <div class="sub-section" id="ai-projects">
-      <h3>🐙 我的项目</h3>
-      <div class="card-list"></div>
-    </div>
-    <div class="empty-state" id="ai-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
-  </section>
-dummy
+  </div>
+</div>
+
 <!-- Footer -->
 <footer>
   <span>© 2026 guozikang</span>
-  <button onclick="exportData()" style="background:none;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:11px;margin-left:8px;">📋 导出数据</button>
+  <button onclick="exportData()">📋 导出数据</button>
 </footer>
+
 
 <script>
 // ===== Data =====
 const defaultData = {
-  school: {
-    links: [
-      { id: 's1', name: '教务管理系统', url: 'https://example.edu.cn/jwc', addedByUser: false },
-      { id: 's2', name: '学校图书馆',   url: 'https://example.edu.cn/lib', addedByUser: false },
-      { id: 's3', name: 'Google Drive', url: 'https://drive.google.com/drive/home', addedByUser: false },
-      { id: 's4', name: 'IELTS', url: 'https://ieltsregistration.britishcouncil.org/', addedByUser: false },
-      { id: 's5', name: 'Lingnan Portal', url: 'https://www.ln.edu.hk/itsc/services/teaching-learning-research-services/elearning-on-moodle', addedByUser: false },
-    ],
-    projects: [
-      { id: 'sp1', name: 'course-helper', url: 'https://github.com/guozikang/course-helper', addedByUser: false },
-    ],
-  },
-  work: {
-    links: [],
-    projects: [],
-  },
-  ai: {
-    links: [],
-    projects: [],
-  },
-  life: {
-    links: [],
-    projects: [],
-  },
+  school: { subcategories: [
+    { id: 'sc_school_default', name: '默认', order: 0, isDefault: true,
+      links: [
+        { id:'s1', name:'教务管理系统', url:'https://example.edu.cn/jwc', addedByUser:false, showName:true },
+        { id:'s2', name:'学校图书馆', url:'https://example.edu.cn/lib', addedByUser:false, showName:true },
+        { id:'s3', name:'Google Drive', url:'https://drive.google.com/drive/home', addedByUser:false, showName:true },
+        { id:'s4', name:'IELTS', url:'https://ieltsregistration.britishcouncil.org/', addedByUser:false, showName:true },
+        { id:'s5', name:'Lingnan Portal', url:'https://www.ln.edu.hk/itsc/services/teaching-learning-research-services/elearning-on-moodle', addedByUser:false, showName:true },
+      ],
+      projects: [
+        { id:'sp1', name:'course-helper', url:'https://github.com/guozikang/course-helper', addedByUser:false, showName:true },
+      ],
+    },
+  ]},
+  work: { subcategories: [
+    { id:'sc_work_default', name:'默认', order:0, isDefault:true, links:[], projects:[] },
+  ]},
+  life: { subcategories: [
+    { id:'sc_life_default', name:'默认', order:0, isDefault:true, links:[], projects:[] },
+  ]},
+  ai: { subcategories: [
+    { id:'sc_ai_default', name:'默认', order:0, isDefault:true, links:[], projects:[] },
+  ]},
 };
 
 let currentData = null;
 let currentTab = 'school';
 let editingId = null;
+let pendingDedupName = null; // auto-generated name for dedup confirmation
+
+// ===== Migration from old format =====
+function migrateData(data) {
+  const cats = ['school', 'work', 'life', 'ai'];
+  let needsMigration = false;
+  for (const cat of cats) {
+    if (data[cat] && !data[cat].subcategories) {
+      needsMigration = true;
+      break;
+    }
+  }
+  if (!needsMigration) return data;
+
+  const result = {};
+  for (const cat of cats) {
+    const old = data[cat] || { links: [], projects: [] };
+    result[cat] = {
+      subcategories: [{
+        id: 'sc_' + cat + '_default',
+        name: '默认',
+        order: 0,
+        isDefault: true,
+        links: (old.links || []).map(item => ({ ...item, showName: item.showName !== undefined ? item.showName : true })),
+        projects: (old.projects || []).map(item => ({ ...item, showName: item.showName !== undefined ? item.showName : true })),
+      }],
+    };
+  }
+  return result;
+}
 
 // ===== localStorage =====
 function saveData() {
-  localStorage.setItem('siteData', JSON.stringify(currentData));
+  localStorage.setItem('siteDataV2', JSON.stringify(currentData));
 }
 
 function mergeData(defaults, saved) {
   const result = JSON.parse(JSON.stringify(defaults));
   for (const cat of ['school', 'work', 'life', 'ai']) {
-    for (const type of ['links', 'projects']) {
-      const savedItems = saved[cat]?.[type] || [];
-      const userItems = savedItems.filter(item => item.addedByUser === true);
-      result[cat][type] = [...result[cat][type], ...userItems];
+    const savedScs = saved[cat]?.subcategories || [];
+    const defaultScs = result[cat].subcategories;
+
+    for (const savedSc of savedScs) {
+      const existing = defaultScs.find(sc => sc.id === savedSc.id);
+      if (existing) {
+        // Merge user-added items into existing default subcategory
+        const userLinks = (savedSc.links || []).filter(item => item.addedByUser);
+        const userProjects = (savedSc.projects || []).filter(item => item.addedByUser);
+        for (const item of [...userLinks, ...userProjects]) {
+          if (!existing.links.find(i => i.id === item.id) && !existing.projects.find(i => i.id === item.id)) {
+            if (userLinks.includes(item)) existing.links.push(item);
+            else existing.projects.push(item);
+          }
+        }
+        existing.name = savedSc.name;
+        existing.order = savedSc.order;
+      } else {
+        // User-created subcategory
+        const newSc = JSON.parse(JSON.stringify(savedSc));
+        newSc.links = (newSc.links || []).filter(item => item.addedByUser);
+        newSc.projects = (newSc.projects || []).filter(item => item.addedByUser);
+        defaultScs.push(newSc);
+      }
     }
+    // Sort by order
+    defaultScs.sort((a, b) => a.order - b.order);
   }
   return result;
 }
 
 function loadData() {
-  const saved = localStorage.getItem('siteData');
+  let saved = localStorage.getItem('siteDataV2');
+  if (!saved) {
+    // Try legacy key
+    saved = localStorage.getItem('siteData');
+  }
   if (!saved) return JSON.parse(JSON.stringify(defaultData));
-  const parsed = JSON.parse(saved);
+  let parsed = JSON.parse(saved);
+  parsed = migrateData(parsed);
   return mergeData(defaultData, parsed);
 }
 
@@ -456,34 +446,10 @@ function switchTab(category) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.tab[data-category="${category}"]`).classList.add('active');
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`tab-${category}`).classList.add('active');
+  document.getElementById('tab-' + category).classList.add('active');
 }
 
-// ===== Card Rendering =====
-function renderCard(item, type) {
-  const icon = type === 'project' ? '🐙' : '🔗';
-  const tagHtml = type === 'project'
-    ? '<span class="card-tag project">GitHub</span>'
-    : '';
-  const arrowHtml = type === 'link'
-    ? '<span class="card-arrow">↗</span>'
-    : '';
-  return `
-    <a class="card" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" data-id="${escapeHtml(item.id)}">
-      <span class="card-icon">${icon}</span>
-      <div class="card-body">
-        <span class="card-name">${escapeHtml(item.name)}</span>
-        <span class="card-url">${escapeHtml(item.url)}</span>
-      </div>
-      ${tagHtml}
-      ${arrowHtml}
-      <div class="card-actions" onclick="event.stopPropagation(); event.preventDefault();">
-        <button class="btn-edit" data-id="${escapeHtml(item.id)}">✏️</button>
-        <button class="btn-delete" data-id="${escapeHtml(item.id)}">🗑️</button>
-      </div>
-    </a>`;
-}
-
+// ===== Helpers =====
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -492,57 +458,160 @@ function escapeHtml(str) {
 
 function findItem(id) {
   for (const cat of ['school', 'work', 'life', 'ai']) {
-    for (const type of ['links', 'projects']) {
-      const idx = currentData[cat][type].findIndex(item => item.id === id);
-      if (idx !== -1) return { cat, type, idx, item: currentData[cat][type][idx] };
+    for (const sc of currentData[cat].subcategories) {
+      for (const type of ['links', 'projects']) {
+        const idx = sc[type].findIndex(item => item.id === id);
+        if (idx !== -1) return { cat, sc, type, idx, item: sc[type][idx] };
+      }
     }
   }
   return null;
 }
 
-function renderCategory(category) {
-  const data = currentData[category];
-  let hasAny = false;
-
-  // Render links
-  const linksSection = document.getElementById(`${category}-links`);
-  const linksList = linksSection.querySelector('.card-list');
-  if (data.links.length === 0) {
-    linksSection.classList.add('empty');
-  } else {
-    linksSection.classList.remove('empty');
-    linksList.innerHTML = data.links.map(item => renderCard(item, 'link')).join('');
-    hasAny = true;
-    // Bind edit/delete events
-    bindCardActions(linksList);
-  }
-
-  // Render projects
-  const projectsSection = document.getElementById(`${category}-projects`);
-  const projectsList = projectsSection.querySelector('.card-list');
-  if (data.projects.length === 0) {
-    projectsSection.classList.add('empty');
-  } else {
-    projectsSection.classList.remove('empty');
-    projectsList.innerHTML = data.projects.map(item => renderCard(item, 'project')).join('');
-    hasAny = true;
-    bindCardActions(projectsList);
-  }
-
-  // Empty state
-  const emptyEl = document.getElementById(`${category}-empty`);
-  emptyEl.style.display = hasAny ? 'none' : 'block';
+function findSubcategory(cat, scId) {
+  return currentData[cat].subcategories.find(sc => sc.id === scId);
 }
 
-function bindCardActions(listEl) {
-  listEl.querySelectorAll('.btn-edit').forEach(btn => {
+// ===== Name & URL Dedup =====
+function getAllItemNames(excludeId) {
+  const names = new Set();
+  for (const cat of ['school', 'work', 'life', 'ai']) {
+    for (const sc of currentData[cat].subcategories) {
+      for (const item of [...sc.links, ...sc.projects]) {
+        if (!excludeId || item.id !== excludeId) names.add(item.name);
+      }
+    }
+  }
+  return names;
+}
+
+function generateUniqueName(baseName, excludeId) {
+  const names = getAllItemNames(excludeId);
+  if (!names.has(baseName)) return baseName;
+  let i = 1;
+  while (names.has(baseName + i)) i++;
+  return baseName + i;
+}
+
+function isUrlDuplicate(url, excludeId) {
+  for (const cat of ['school', 'work', 'life', 'ai']) {
+    for (const sc of currentData[cat].subcategories) {
+      for (const item of [...sc.links, ...sc.projects]) {
+        if ((!excludeId || item.id !== excludeId) && item.url === url) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ===== Card Rendering =====
+function renderCard(item, type) {
+  const icon = type === 'project' ? '🐙' : '🔗';
+  const tagHtml = type === 'project'
+    ? '<span class="card-tag project">GitHub</span>' : '';
+  const arrowHtml = type === 'link'
+    ? '<span class="card-arrow">↗</span>' : '';
+
+  const nameClass = item.showName ? '' : ' hidden-name';
+  const nameDisplay = item.showName ? escapeHtml(item.name) : '***';
+  const eyeIcon = item.showName ? '👁️' : '👁️‍🗨️';
+
+  return '<a class="card" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer" data-id="' + escapeHtml(item.id) + '">'
+    + '<span class="card-icon">' + icon + '</span>'
+    + '<div class="card-body">'
+    + '<span class="card-name' + nameClass + '">' + nameDisplay + '</span>'
+    + '<span class="card-url">' + escapeHtml(item.url) + '</span>'
+    + '</div>'
+    + tagHtml
+    + arrowHtml
+    + '<div class="card-actions" onclick="event.stopPropagation();event.preventDefault();">'
+    + '<button class="btn-eye" data-id="' + escapeHtml(item.id) + '" title="切换名称显示">' + eyeIcon + '</button>'
+    + '<button class="btn-edit" data-id="' + escapeHtml(item.id) + '">✏️</button>'
+    + '<button class="btn-delete" data-id="' + escapeHtml(item.id) + '">🗑️</button>'
+    + '</div>'
+    + '</a>';
+}
+
+// ===== Subcategory Rendering =====
+function renderSubcatHeader(sc, cat, isFirst, isLast) {
+  const actionsHtml = '<div class="subcat-actions">'
+    + '<button class="btn-subcat move" onclick="moveSubcat(\'' + cat + '\',\'' + sc.id + '\',-1)" ' + (isFirst ? 'disabled' : '') + '>↑</button>'
+    + '<button class="btn-subcat move" onclick="moveSubcat(\'' + cat + '\',\'' + sc.id + '\',1)" ' + (isLast ? 'disabled' : '') + '>↓</button>'
+    + (!sc.isDefault ? '<button class="btn-subcat" onclick="openRenameSubcat(\'' + cat + '\',\'' + sc.id + '\')">✏️</button>' : '')
+    + (!sc.isDefault ? '<button class="btn-subcat delete" onclick="deleteSubcat(\'' + cat + '\',\'' + sc.id + '\')">🗑️</button>' : '')
+    + '</div>';
+
+  return '<div class="subcat-header">'
+    + '<span class="subcat-name">' + escapeHtml(sc.name) + '</span>'
+    + actionsHtml
+    + '</div>';
+}
+
+function renderCategory(category) {
+  const panel = document.getElementById('tab-' + category);
+  const data = currentData[category];
+  let html = '';
+  let hasAnyItem = false;
+
+  const sortedScs = [...data.subcategories].sort((a, b) => a.order - b.order);
+
+  for (let i = 0; i < sortedScs.length; i++) {
+    const sc = sortedScs[i];
+    const isFirst = i === 0;
+    const isLast = i === sortedScs.length - 1;
+
+    html += '<div class="subcat" data-subcat-id="' + sc.id + '">';
+    html += renderSubcatHeader(sc, category, isFirst, isLast);
+
+    // Links
+    const hasLinks = sc.links.length > 0;
+    if (hasLinks) {
+      html += '<div class="subcat-type-label">🔗 外部链接</div>';
+      html += sc.links.map(item => renderCard(item, 'link')).join('');
+      hasAnyItem = true;
+    }
+
+    // Projects
+    const hasProjects = sc.projects.length > 0;
+    if (hasProjects) {
+      html += '<div class="subcat-type-label">🐙 我的项目</div>';
+      html += sc.projects.map(item => renderCard(item, 'project')).join('');
+      hasAnyItem = true;
+    }
+
+    html += '</div>';
+  }
+
+  // Add subcategory button
+  html += '<button class="btn-add-subcat" onclick="openAddSubcatModal(\'' + category + '\')">+ 新增子分类</button>';
+
+  // Empty state
+  if (!hasAnyItem) {
+    html += '<div class="empty-state">暂无内容，点击下方按钮添加子分类和链接</div>';
+  }
+
+  panel.innerHTML = html;
+
+  // Bind card events
+  bindCardEvents(panel);
+}
+
+function bindCardEvents(panel) {
+  panel.querySelectorAll('.btn-eye').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      toggleShowName(btn.dataset.id);
+    });
+  });
+  panel.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
       openEditModal(btn.dataset.id);
     });
   });
-  listEl.querySelectorAll('.btn-delete').forEach(btn => {
+  panel.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -551,113 +620,274 @@ function bindCardActions(listEl) {
   });
 }
 
+function toggleShowName(id) {
+  const found = findItem(id);
+  if (!found) return;
+  found.item.showName = !found.item.showName;
+  saveData();
+  renderCategory(found.cat);
+}
+
 function renderAll() {
   for (const cat of ['school', 'work', 'life', 'ai']) {
     renderCategory(cat);
   }
 }
 
-// ===== Modal =====
+// ===== Subcategory CRUD =====
+let pendingSubcatCategory = null;
+let pendingSubcatEditId = null;
+
+function openAddSubcatModal(category) {
+  pendingSubcatCategory = category;
+  pendingSubcatEditId = null;
+  document.getElementById('subcat-modal-title').textContent = '➕ 新增子分类';
+  document.getElementById('subcat-name-input').value = '';
+  document.getElementById('modal-subcat').classList.remove('hidden');
+}
+
+function openRenameSubcat(category, scId) {
+  const sc = findSubcategory(category, scId);
+  if (!sc || sc.isDefault) return;
+  pendingSubcatCategory = category;
+  pendingSubcatEditId = scId;
+  document.getElementById('subcat-modal-title').textContent = '✏️ 重命名子分类';
+  document.getElementById('subcat-name-input').value = sc.name;
+  document.getElementById('modal-subcat').classList.remove('hidden');
+}
+
+function closeSubcatModal() {
+  document.getElementById('modal-subcat').classList.add('hidden');
+  pendingSubcatCategory = null;
+  pendingSubcatEditId = null;
+}
+
+function handleSubcatSave() {
+  const name = document.getElementById('subcat-name-input').value.trim();
+  if (!name) { alert('请填写子分类名称'); return; }
+
+  if (pendingSubcatEditId) {
+    const sc = findSubcategory(pendingSubcatCategory, pendingSubcatEditId);
+    if (sc) sc.name = name;
+  } else {
+    const scs = currentData[pendingSubcatCategory].subcategories;
+    const maxOrder = scs.reduce((m, s) => Math.max(m, s.order), 0);
+    scs.push({
+      id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name,
+      order: maxOrder + 1,
+      isDefault: false,
+      links: [],
+      projects: [],
+    });
+  }
+
+  saveData();
+  renderCategory(pendingSubcatCategory);
+  closeSubcatModal();
+}
+
+function moveSubcat(category, scId, delta) {
+  const scs = currentData[category].subcategories;
+  scs.sort((a, b) => a.order - b.order);
+  const idx = scs.findIndex(sc => sc.id === scId);
+  if (idx === -1) return;
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= scs.length) return;
+
+  // Swap orders
+  const tmp = scs[idx].order;
+  scs[idx].order = scs[newIdx].order;
+  scs[newIdx].order = tmp;
+
+  saveData();
+  renderCategory(category);
+}
+
+function deleteSubcat(category, scId) {
+  const sc = findSubcategory(category, scId);
+  if (!sc || sc.isDefault) return;
+  const itemCount = sc.links.length + sc.projects.length;
+  let msg = '确定删除子分类「' + sc.name + '」？';
+  if (itemCount > 0) {
+    msg += '\n\n⚠️ 该子分类下有 ' + itemCount + ' 条链接/项目，删除后它们也会被移除。';
+  }
+  if (!confirm(msg)) return;
+
+  currentData[category].subcategories = currentData[category].subcategories.filter(s => s.id !== scId);
+  saveData();
+  renderCategory(category);
+}
+
+// ===== Main Modal =====
+function populateSubcatSelect(category) {
+  const sel = document.getElementById('modal-subcat');
+  sel.innerHTML = '';
+  const scs = [...currentData[category].subcategories].sort((a, b) => a.order - b.order);
+  for (const sc of scs) {
+    const opt = document.createElement('option');
+    opt.value = sc.id;
+    opt.textContent = sc.name;
+    sel.appendChild(opt);
+  }
+}
+
+document.getElementById('modal-category').addEventListener('change', function() {
+  populateSubcatSelect(this.value);
+});
+
 function openAddModal() {
   editingId = null;
+  pendingDedupName = null;
   document.getElementById('modal-title').textContent = '➕ 添加链接';
   document.getElementById('modal-category').value = currentTab;
+  populateSubcatSelect(currentTab);
   document.getElementById('modal-type').value = 'links';
   document.getElementById('modal-name').value = '';
   document.getElementById('modal-url').value = '';
-  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-show-name').checked = true;
+  document.getElementById('modal-name-warning').style.display = 'none';
+  document.getElementById('modal-main').classList.remove('hidden');
 }
 
 function openEditModal(id) {
   const found = findItem(id);
   if (!found) return;
   editingId = id;
+  pendingDedupName = null;
   document.getElementById('modal-title').textContent = '✏️ 编辑链接';
   document.getElementById('modal-category').value = found.cat;
+  populateSubcatSelect(found.cat);
+  document.getElementById('modal-subcat').value = found.sc.id;
   document.getElementById('modal-type').value = found.type;
   document.getElementById('modal-name').value = found.item.name;
   document.getElementById('modal-url').value = found.item.url;
-  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-show-name').checked = found.item.showName !== false;
+  document.getElementById('modal-name-warning').style.display = 'none';
+  document.getElementById('modal-main').classList.remove('hidden');
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.add('hidden');
+function closeMainModal() {
+  document.getElementById('modal-main').classList.add('hidden');
   editingId = null;
+  pendingDedupName = null;
 }
 
 function handleSave() {
   const category = document.getElementById('modal-category').value;
+  const subcatId = document.getElementById('modal-subcat').value;
   const type = document.getElementById('modal-type').value;
-  const name = document.getElementById('modal-name').value.trim();
+  let name = document.getElementById('modal-name').value.trim();
   const url = document.getElementById('modal-url').value.trim();
+  const showName = document.getElementById('modal-show-name').checked;
 
   if (!name || !url) {
     alert('请填写名称和 URL');
     return;
   }
 
+  // URL dedup
+  if (isUrlDuplicate(url, editingId)) {
+    alert('⚠️ 你已添加该网站');
+    return;
+  }
+
+  // Name dedup
+  const allNames = getAllItemNames(editingId);
+  if (allNames.has(name)) {
+    const autoName = generateUniqueName(name, editingId);
+    pendingDedupName = autoName;
+    document.getElementById('dedup-auto-name').textContent = autoName;
+    document.getElementById('modal-dedup').classList.remove('hidden');
+    return;
+  }
+
+  doSave(category, subcatId, type, name, url, showName);
+}
+
+function dedupUseAuto() {
+  const name = pendingDedupName;
+  const category = document.getElementById('modal-category').value;
+  const subcatId = document.getElementById('modal-subcat').value;
+  const type = document.getElementById('modal-type').value;
+  const url = document.getElementById('modal-url').value.trim();
+  const showName = document.getElementById('modal-show-name').checked;
+  pendingDedupName = null;
+  document.getElementById('modal-dedup').classList.add('hidden');
+  doSave(category, subcatId, type, name, url, showName);
+}
+
+function dedupUseCustom() {
+  pendingDedupName = null;
+  document.getElementById('modal-dedup').classList.add('hidden');
+  // User goes back to edit name manually
+  document.getElementById('modal-name').focus();
+  document.getElementById('modal-name').select();
+}
+
+function doSave(category, subcatId, type, name, url, showName) {
   if (editingId) {
-    // Edit existing
     const found = findItem(editingId);
     if (found) {
-      const oldCat = found.cat;
-      const oldType = found.type;
-      const oldIdx = found.idx;
       // Remove from old location
-      currentData[oldCat][oldType].splice(oldIdx, 1);
-      // If editing a preset item, mark as user-modified
-      if (!found.item.addedByUser) {
-        found.item.addedByUser = true;
-      }
-      // Update fields
+      found.sc[found.type].splice(found.idx, 1);
       found.item.name = name;
       found.item.url = url;
+      found.item.showName = showName;
+      if (!found.item.addedByUser) found.item.addedByUser = true;
       // Add to new location
-      currentData[category][type].push(found.item);
-      // Re-render old location if different
-      if (oldCat !== category || oldType !== type) {
-        renderCategory(oldCat);
-      }
+      const targetSc = findSubcategory(category, subcatId);
+      if (targetSc) targetSc[type].push(found.item);
+      // Re-render old cat if moved
+      if (found.cat !== category) renderCategory(found.cat);
     }
+    editingId = null;
   } else {
-    // Add new
-    const newItem = {
+    const sc = findSubcategory(category, subcatId);
+    if (!sc) return;
+    sc[type].push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name: name,
       url: url,
+      showName: showName,
       addedByUser: true,
-    };
-    currentData[category][type].push(newItem);
+    });
   }
 
   saveData();
   renderCategory(category);
-  closeModal();
+  closeMainModal();
 }
 
 function deleteItem(id) {
   if (!confirm('确定删除这条链接？')) return;
   const found = findItem(id);
   if (!found) return;
-  currentData[found.cat][found.type].splice(found.idx, 1);
+  found.sc[found.type].splice(found.idx, 1);
   saveData();
   renderCategory(found.cat);
 }
 
-// Overlay click to close
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
 // ===== Export =====
 function exportData() {
-  const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
+  const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = "site-data.json";
+  a.download = 'site-data.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+// ===== Modal close on overlay click =====
+document.getElementById('modal-main').addEventListener('click', function(e) {
+  if (e.target === this) closeMainModal();
+});
+document.getElementById('modal-dedup').addEventListener('click', function(e) {
+  if (e.target === this) { pendingDedupName = null; this.classList.add('hidden'); }
+});
+document.getElementById('modal-subcat').addEventListener('click', function(e) {
+  if (e.target === this) closeSubcatModal();
+});
 
 // ===== Init =====
 currentData = loadData();
