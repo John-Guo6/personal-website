@@ -302,6 +302,7 @@ footer {
   <button class="tab active" data-category="school" onclick="switchTab('school')">🎓 学校</button>
   <button class="tab" data-category="work" onclick="switchTab('work')">💼 工作</button>
   <button class="tab" data-category="life" onclick="switchTab('life')">🌈 生活</button>
+  <button class="tab" data-category="ai" onclick="switchTab('ai')">🤖 AI</button>
 </nav>
 
 <!-- Content -->
@@ -355,6 +356,7 @@ footer {
       <option value="school">🎓 学校</option>
       <option value="work">💼 工作</option>
       <option value="life">🌈 生活</option>
+      <option value="ai">🤖 AI</option>
     </select>
     <label for="modal-type">类型</label>
     <select id="modal-type">
@@ -372,6 +374,19 @@ footer {
   </div>
 </div>
 
+
+  <section id="tab-ai" class="tab-panel">
+    <div class="sub-section" id="ai-links">
+      <h3>🔗 外部链接</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="sub-section" id="ai-projects">
+      <h3>🐙 我的项目</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="empty-state" id="ai-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
+  </section>
+dummy
 <!-- Footer -->
 <footer>
   <span>© 2026 guozikang</span>
@@ -397,6 +412,10 @@ const defaultData = {
     links: [],
     projects: [],
   },
+  ai: {
+    links: [],
+    projects: [],
+  },
   life: {
     links: [],
     projects: [],
@@ -414,7 +433,7 @@ function saveData() {
 
 function mergeData(defaults, saved) {
   const result = JSON.parse(JSON.stringify(defaults));
-  for (const cat of ['school', 'work', 'life']) {
+  for (const cat of ['school', 'work', 'life', 'ai']) {
     for (const type of ['links', 'projects']) {
       const savedItems = saved[cat]?.[type] || [];
       const userItems = savedItems.filter(item => item.addedByUser === true);
@@ -472,7 +491,7 @@ function escapeHtml(str) {
 }
 
 function findItem(id) {
-  for (const cat of ['school', 'work', 'life']) {
+  for (const cat of ['school', 'work', 'life', 'ai']) {
     for (const type of ['links', 'projects']) {
       const idx = currentData[cat][type].findIndex(item => item.id === id);
       if (idx !== -1) return { cat, type, idx, item: currentData[cat][type][idx] };
@@ -533,7 +552,7 @@ function bindCardActions(listEl) {
 }
 
 function renderAll() {
-  for (const cat of ['school', 'work', 'life']) {
+  for (const cat of ['school', 'work', 'life', 'ai']) {
     renderCategory(cat);
   }
 }
