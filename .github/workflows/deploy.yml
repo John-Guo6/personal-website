@@ -10,18 +10,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          echo -e "\n" | bash install.sh --accept-all-defaults
+          echo "$HOME/lib/oracle-cli/bin" >> $GITHUB_PATH
+
+      - name: Setup OCI config
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+          cat > ~/.oci/config << OCIEOF
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_KEY_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=~/.oci/oci_api_key.pem
+          OCIEOF
+
       - name: Upload to OCI Object Storage
-        uses: oracle-actions/run-oci-cli-command@v1
-        with:
-          user: ${{ secrets.OCI_USER_OCID }}
-          fingerprint: ${{ secrets.OCI_KEY_FINGERPRINT }}
-          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
-          region: ${{ secrets.OCI_REGION }}
-          key: ${{ secrets.OCI_PRIVATE_KEY }}
-          command: |
-            oci os object put \
-              --bucket-name JohnG-personal \
-              --file index.html \
-              --name index.html \
-              --force \
-              --namespace ax9xub0hkknv
+        run: |
+          oci os object put \
+            --bucket-name JohnG-personal \
+            --file index.html \
+            --name index.html \
+            --force \
+            --namespace ax9xub0hkknv
