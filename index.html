@@ -323,7 +323,9 @@ footer button {
 <!-- Footer -->
 <footer>
   <span>© 2026 guozikang</span>
-  <button onclick="exportData()">📋 导出数据</button>
+  <button onclick="exportData()">📋 导出</button>
+  <button onclick="triggerImport()">📥 导入</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
 </footer>
 
 
@@ -876,6 +878,31 @@ function exportData() {
   a.download = 'site-data.json';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// ===== Import =====
+function triggerImport() {
+  document.getElementById("import-file").click();
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const migrated = migrateData(data);
+      currentData = mergeData(defaultData, migrated);
+      saveData();
+      renderAll();
+      alert("✅ 导入成功！");
+    } catch(err) {
+      alert("❌ 导入失败：文件格式不正确");
+    }
+  };
+  reader.readAsText(file);
+  input.value = "";
 }
 
 // ===== Modal close on overlay click =====
