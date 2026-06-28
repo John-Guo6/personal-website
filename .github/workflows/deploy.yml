@@ -1,0 +1,27 @@
+name: Deploy to OCI Object Storage
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload to OCI Object Storage
+        uses: oracle-actions/run-oci-cli-command@v1
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_KEY_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          command: |
+            oci os object put \
+              --bucket-name JohnG-personal \
+              --file index.html \
+              --name index.html \
+              --force \
+              --namespace ax9xub0hkknv
