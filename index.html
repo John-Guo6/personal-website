@@ -517,10 +517,10 @@ function isUrlDuplicate(url, excludeId) {
 
 // ===== Card Rendering =====
 function renderCard(item, type, cat, scId) {
-  const icon = type === 'project' ? '🐙' : '🔗';
-  const tagHtml = type === 'project'
+  const icon = type === 'projects' ? '🐙' : '🔗';
+  const tagHtml = type === 'projects'
     ? '<span class="card-tag project">GitHub</span>' : '';
-  const arrowHtml = type === 'link'
+  const arrowHtml = type === 'links'
     ? '<span class="card-arrow">↗</span>' : '';
 
   const nameClass = item.showName ? '' : ' hidden-name';
@@ -528,8 +528,8 @@ function renderCard(item, type, cat, scId) {
   const eyeIcon = item.showName ? '👁️' : '👁️‍🗨️';
 
   return '<a class="card" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer" '
-    + 'draggable="true" data-id="' + escapeHtml(item.id) + '" data-cat="' + cat + '" data-subcat-id="' + scId + '" data-type="' + type + '">'
-    + '<span class="card-handle" title="拖拽移动">⠿</span>'
+    + 'data-id="' + escapeHtml(item.id) + '" data-cat="' + cat + '" data-subcat-id="' + scId + '" data-type="' + type + '" draggable="false">'
+    + '<span class="card-handle" title="拖拽移动" draggable="true">⠿</span>'
     + '<span class="card-icon">' + icon + '</span>'
     + '<div class="card-body">'
     + '<span class="card-name' + nameClass + '">' + nameDisplay + '</span>'
@@ -580,7 +580,7 @@ function renderCategory(category) {
     const hasLinks = sc.links.length > 0;
     if (hasLinks) {
       html += '<div class="subcat-type-label">🔗 外部链接</div>';
-      html += sc.links.map(item => renderCard(item, 'link', category, sc.id)).join('');
+      html += sc.links.map(item => renderCard(item, 'links', category, sc.id)).join('');
       hasAnyItem = true;
     }
 
@@ -588,7 +588,7 @@ function renderCategory(category) {
     const hasProjects = sc.projects.length > 0;
     if (hasProjects) {
       html += '<div class="subcat-type-label">🐙 我的项目</div>';
-      html += sc.projects.map(item => renderCard(item, 'project', category, sc.id)).join('');
+      html += sc.projects.map(item => renderCard(item, 'projects', category, sc.id)).join('');
       hasAnyItem = true;
     }
 
@@ -666,6 +666,7 @@ var dragItemData = null;
 var dragHighlightEl = null;
 
 function onPanelDragStart(e) {
+  if (!e.target.classList.contains('card-handle')) return;
   var card = e.target.closest('.card');
   if (!card) return;
   var id = card.dataset.id;
@@ -685,9 +686,8 @@ function onPanelDragStart(e) {
 }
 
 function onPanelDragEnd(e) {
-  var card = e.target.closest('.card');
-  if (card) card.classList.remove('dragging');
   clearDragHighlight();
+  document.querySelectorAll('.card.dragging').forEach(function(el) { el.classList.remove('dragging'); });
 }
 
 function clearDragHighlight() {
@@ -706,9 +706,12 @@ function closestSubcat(el) {
 }
 
 function onTabDragOver(e) {
-  var sc = closestSubcat(e.target);
-  if (!sc || sc.dataset.cat !== dragSourceCat) return;
   e.preventDefault();
+  var sc = closestSubcat(e.target);
+  if (!sc || sc.dataset.cat !== dragSourceCat) {
+    e.dataTransfer.dropEffect = 'none';
+    return;
+  }
   e.dataTransfer.dropEffect = 'move';
   if (dragHighlightEl !== sc) {
     clearDragHighlight();
