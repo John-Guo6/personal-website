@@ -918,6 +918,19 @@ document.getElementById('modal-subcat-editor').addEventListener('click', functio
   if (e.target === this) closeSubcatModal();
 });
 
+// ===== Download Backup =====
+function downloadBackup() {
+  const data = localStorage.getItem('siteDataV2_backup') || localStorage.getItem('siteDataV2');
+  if (!data) { alert('⚠️ 没有可下载的备份'); return; }
+  const date = new Date().toISOString().slice(0,10);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'site-data-backup-' + date + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 // ===== Data Recovery =====
 function recoverData() {
   const backup = localStorage.getItem('siteDataV2_backup');
