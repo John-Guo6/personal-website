@@ -38,6 +38,13 @@ header {
 }
 header h1 { font-size: 22px; color: var(--accent-blue); }
 header .tagline { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+.header-edit-btn {
+  position: fixed; top: 12px; right: 16px; z-index: 200;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; font-size: 16px; opacity: 0.6;
+  padding: 4px 8px; color: var(--text-secondary);
+}
+.header-edit-btn:hover { color: var(--accent-blue); opacity: 1; }
 
 /* ===== Navigation Tabs ===== */
 nav {
@@ -71,7 +78,7 @@ main {
 .subcat-header .subcat-name {
   font-size: 14px; color: var(--accent-yellow); font-weight: bold;
 }
-.subcat-header .subcat-actions { display: flex; gap: 2px; margin-left: auto; opacity: 0; transition: opacity 0.2s; }
+.subcat-header .subcat-actions { display: flex; gap: 2px; margin-left: auto; opacity: 0.5; }
 .subcat-header:hover .subcat-actions { opacity: 1; }
 .subcat-header .btn-subcat {
   background: none; border: 1px solid var(--border); color: var(--text-secondary);
@@ -259,8 +266,9 @@ footer button {
 <body>
 
 <header>
-  <h1>guozikang</h1>
-  <p class="tagline">&gt; 开发者 · 终身学习者</p>
+  <h1 id="site-title">guozikang</h1>
+  <p class="tagline" id="site-tagline">&gt; 开发者 · 终身学习者</p>
+  <span class="header-edit-btn" onclick="openSettingsModal()" title="编辑顶部文字">✏️</span>
 </header>
 
 <nav>
@@ -326,6 +334,21 @@ footer button {
     <div class="modal-actions" style="justify-content:center;">
       <button class="btn-cancel" onclick="dedupUseCustom()">自行填写</button>
       <button class="btn-save" onclick="dedupUseAuto()">使用自动名称</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="modal-settings" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>⚙️ 设置顶部文字</h3>
+    <label for="settings-title">网站标题</label>
+    <input id="settings-title" type="text" placeholder="guozikang" required>
+    <label for="settings-tagline">副标题</label>
+    <input id="settings-tagline" type="text" placeholder="开发者 · 终身学习者" required>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSettingsModal()">取消</button>
+      <button class="btn-save" onclick="handleSettingsSave()">保存</button>
     </div>
   </div>
 </div>
@@ -1146,9 +1169,52 @@ function recoverData() {
   }
 }
 
+// ===== Settings =====
+function loadSiteConfig() {
+  var raw = localStorage.getItem('siteConfig');
+  if (!raw) return { title: 'guozikang', tagline: '开发者 · 终身学习者' };
+  try { return JSON.parse(raw); } catch(e) { return { title: 'guozikang', tagline: '开发者 · 终身学习者' }; }
+}
+
+function saveSiteConfig(config) {
+  localStorage.setItem('siteConfig', JSON.stringify(config));
+}
+
+function applySiteConfig() {
+  var config = loadSiteConfig();
+  document.getElementById('site-title').textContent = config.title;
+  document.getElementById('site-tagline').textContent = '> ' + config.tagline;
+  document.title = config.title;
+}
+
+function openSettingsModal() {
+  var config = loadSiteConfig();
+  document.getElementById('settings-title').value = config.title;
+  document.getElementById('settings-tagline').value = config.tagline;
+  document.getElementById('modal-settings').classList.remove('hidden');
+}
+
+function closeSettingsModal() {
+  document.getElementById('modal-settings').classList.add('hidden');
+}
+
+function handleSettingsSave() {
+  var title = document.getElementById('settings-title').value.trim();
+  var tagline = document.getElementById('settings-tagline').value.trim();
+  if (!title) { alert('请填写网站标题'); return; }
+  saveSiteConfig({ title: title, tagline: tagline || '' });
+  applySiteConfig();
+  closeSettingsModal();
+}
+
+document.getElementById('modal-settings').addEventListener('click', function(e) {
+  if (e.target === this) closeSettingsModal();
+});
+
 // ===== Init =====
 currentData = loadData();
 renderAll();
+applySiteConfig();
 switchTab('school');
 </script>
 
