@@ -745,6 +745,270 @@ function onTabDrop(e) {
   saveData();
   renderCategory(targetCat);
 }
+// ===== Subcategory Variables =====
+var pendingSubcatCategory = null;
+var pendingSubcatEditId = null;
+
+// ===== Subcategory CRUD =====
+function openAddSubcatModal(category) {
+  pendingSubcatCategory = category;
+  pendingSubcatEditId = null;
+  document.getElementById('subcat-modal-title').textContent = '➕ 新增子分类';
+  document.getElementById('subcat-name-input').value = '';
+  document.getElementById('modal-subcat-editor').classList.remove('hidden');
+}
+
+function openRenameSubcat(category, scId) {
+  const sc = findSubcategory(category, scId);
+  if (!sc || sc.isDefault) return;
+  pendingSubcatCategory = category;
+  pendingSubcatEditId = scId;
+  document.getElementById('subcat-modal-title').textContent = '✏️ 重命名子分类';
+  document.getElementById('subcat-name-input').value = sc.name;
+  document.getElementById('modal-subcat-editor').classList.remove('hidden');
+}
+
+function closeSubcatModal() {
+  document.getElementById('modal-subcat-editor').classList.add('hidden');
+  pendingSubcatCategory = null;
+  pendingSubcatEditId = null;
+}
+
+function handleSubcatSave() {
+  const name = document.getElementById('subcat-name-input').value.trim();
+  if (!name) { alert('请填写子分类名称'); return; }
+
+  if (pendingSubcatEditId) {
+    const sc = findSubcategory(pendingSubcatCategory, pendingSubcatEditId);
+    if (sc) sc.name = name;
+  } else {
+    const scs = currentData[pendingSubcatCategory].subcategories;
+    const maxOrder = scs.reduce(function(m, s) { return Math.max(m, s.order); }, 0);
+    scs.push({
+      id: 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name,
+      order: maxOrder + 1,
+      isDefault: false,
+      links: [],
+      projects: [],
+    });
+  }
+
+  saveData();
+  renderCategory(pendingSubcatCategory);
+  closeSubcatModal();
+}
+
+function moveSubcat(category, scId, delta) {
+  const scs = currentData[category].subcategories;
+  scs.sort(function(a, b) { return a.order - b.order; });
+  const idx = scs.findIndex(function(sc) { return sc.id === scId; });
+  if (idx === -1) return;
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= scs.length) return;
+  const tmp = scs[idx].order;
+  scs[idx].order = scs[newIdx].order;
+  scs[newIdx].order = tmp;
+  saveData();
+  renderCategory(category);
+}
+
+function deleteSubcat(category, scId) {
+  const sc = findSubcategory(category, scId);
+  if (!sc || sc.isDefault) return;
+  const itemCount = sc.links.length + sc.projects.length;
+  var msg = '确定删除子分类「' + sc.name + '」？';
+  if (itemCount > 0) {
+    msg += '\n\n⚠️ 该子分类下有 ' + itemCount + ' 条链接/项目，删除后它们也会被移除。';
+  }
+  if (!confirm(msg)) return;
+  currentData[category].subcategories = currentData[category].subcategories.filter(function(s) { return s.id !== scId; });
+  saveData();
+  renderCategory(category);
+}
+
+// ===== Main Modal =====
+function populateSubcatSelect(category) {
+  const sel = document.getElementById('modal-subcat');
+  sel.innerHTML = '';
+  const scs = currentData[category].subcategories.slice().sort(function(a, b) { return a.order - b.order; });
+  for (var i = 0; i < scs.length; i++) {
+    const opt = document.createElement('option');
+    opt.value = scs[i].id;
+    opt.textContent = scs[i].name;
+    sel.appendChild(opt);
+  }
+}
+
+document.getElementById('modal-category').addEventListener('change', function() {
+  populateSubcatSelect(this.value);
+});
+
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '➕ 添加链接';
+  document.getElementById('modal-category').value = currentTab;
+  populateSubcatSelect(currentTab);
+  document.getElementById('modal-type').value = 'links';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-url').value = '';
+  document.getElementById('modal-show-name').checked = true;
+  document.getElementById('modal-main').classList.remove('hidden');
+}
+
+function openEditModal(id) {
+  const found = findItem(id);
+  if (!found) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = '✏️ 编辑链接';
+  document.getElementById('modal-category').value = found.cat;
+  populateSubcatSelect(found.cat);
+  document.getElementById('modal-subcat').value = found.sc.id;
+  document.getElementById('modal-type').value = found.type;
+  document.getElementById('modal-name').value = found.item.name;
+  document.getElementById('modal-url').value = found.item.url;
+  document.getElementById('modal-show-name').checked = found.item.showName !== false;
+  document.getElementById('modal-main').classList.remove('hidden');
+}
+
+function closeMainModal() {
+  document.getElementById('modal-main').classList.add('hidden');
+  editingId = null;
+}
+
+function handleSave() {
+  const category = document.getElementById('modal-category').value;
+  const subcatId = document.getElementById('modal-subcat').value;
+  const type = document.getElementById('modal-type').value;
+  var name = document.getElementById('modal-name').value.trim();
+  const url = document.getElementById('modal-url').value.trim();
+  const showName = document.getElementById('modal-show-name').checked;
+
+  if (!name || !url) {
+    alert('请填写名称和 URL');
+    return;
+  }
+
+  if (isUrlDuplicate(url, editingId)) {
+    alert('⚠️ 你已添加该网站');
+    return;
+  }
+
+  const allNames = getAllItemNames(editingId);
+  if (allNames.has(name)) {
+    pendingDedupName = generateUniqueName(name, editingId);
+    document.getElementById('dedup-auto-name').textContent = pendingDedupName;
+    document.getElementById('modal-dedup').classList.remove('hidden');
+    return;
+  }
+
+  doSave(category, subcatId, type, name, url, showName);
+}
+
+function dedupUseAuto() {
+  const name = pendingDedupName;
+  const category = document.getElementById('modal-category').value;
+  const subcatId = document.getElementById('modal-subcat').value;
+  const type = document.getElementById('modal-type').value;
+  const url = document.getElementById('modal-url').value.trim();
+  const showName = document.getElementById('modal-show-name').checked;
+  pendingDedupName = null;
+  document.getElementById('modal-dedup').classList.add('hidden');
+  doSave(category, subcatId, type, name, url, showName);
+}
+
+function dedupUseCustom() {
+  pendingDedupName = null;
+  document.getElementById('modal-dedup').classList.add('hidden');
+  document.getElementById('modal-name').focus();
+  document.getElementById('modal-name').select();
+}
+
+function doSave(category, subcatId, type, name, url, showName) {
+  if (editingId) {
+    const found = findItem(editingId);
+    if (found) {
+      found.sc[found.type].splice(found.idx, 1);
+      found.item.name = name;
+      found.item.url = url;
+      found.item.showName = showName;
+      if (!found.item.addedByUser) found.item.addedByUser = true;
+      const targetSc = findSubcategory(category, subcatId);
+      if (targetSc) targetSc[type].push(found.item);
+      if (found.cat !== category) renderCategory(found.cat);
+    }
+    editingId = null;
+  } else {
+    const sc = findSubcategory(category, subcatId);
+    if (!sc) return;
+    sc[type].push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name,
+      url: url,
+      showName: showName,
+      addedByUser: true,
+    });
+  }
+
+  saveData();
+  renderCategory(category);
+  closeMainModal();
+}
+
+function deleteItem(id) {
+  if (!confirm('确定删除这条链接？')) return;
+  const found = findItem(id);
+  if (!found) return;
+  found.sc[found.type].splice(found.idx, 1);
+  saveData();
+  renderCategory(found.cat);
+}
+
+// ===== Export & Import =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'site-data.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function triggerImport() {
+  document.getElementById('import-file').click();
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const migrated = migrateData(data);
+      currentData = mergeData(defaultData, migrated);
+      saveData();
+      renderAll();
+      alert('✅ 导入成功！');
+    } catch(err) {
+      alert('❌ 导入失败：文件格式不正确');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ===== Modal close on overlay click =====
+document.getElementById('modal-main').addEventListener('click', function(e) {
+  if (e.target === this) closeMainModal();
+});
+document.getElementById('modal-dedup').addEventListener('click', function(e) {
+  if (e.target === this) { pendingDedupName = null; this.classList.add('hidden'); }
+});
+document.getElementById('modal-subcat-editor').addEventListener('click', function(e) {
+  if (e.target === this) closeSubcatModal();
+});
+
 
 // ===== Download Backup =====
 function downloadBackup() {
