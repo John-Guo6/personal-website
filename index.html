@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guozikang</title>
+<style>
+/* ===== CSS Variables & Reset ===== */
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --border: #30363d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --accent-blue: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-red: #f85149;
+  --tab-active: #1f6feb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ===== Header ===== */
+header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 32px;
+  text-align: center;
+}
+header h1 {
+  font-size: 22px;
+  color: var(--accent-blue);
+}
+header .tagline {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* ===== Navigation Tabs ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 0 0 0;
+  background: var(--bg-primary);
+}
+.tab {
+  padding: 8px 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  background: var(--tab-active);
+  color: #fff;
+  font-weight: bold;
+}
+
+/* ===== Content Area ===== */
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0;
+  border-top: 2px solid var(--tab-active);
+}
+.tab-panel { display: none; padding: 24px 32px 16px; }
+.tab-panel.active { display: block; }
+
+/* ===== Sub Sections ===== */
+.sub-section { margin-bottom: 28px; }
+.sub-section.empty { display: none; }
+.sub-section h3 {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* ===== Cards ===== */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+.card:hover {
+  border-color: var(--accent-blue);
+  box-shadow: 0 2px 8px rgba(88,166,255,0.15);
+}
+.card-icon { font-size: 18px; flex-shrink: 0; }
+.card-body { flex: 1; min-width: 0; }
+.card-name {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.card-url {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #21262d;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.card-tag.project { color: var(--accent-green); }
+.card-arrow {
+  color: var(--text-secondary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.card-actions {
+  opacity: 0;
+  display: flex;
+  gap: 4px;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.card:hover .card-actions { opacity: 1; }
+.btn-edit, .btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+.btn-edit { color: var(--accent-blue); }
+.btn-delete { color: var(--accent-red); }
+.btn-edit:hover, .btn-delete:hover { opacity: 0.8; }
+
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ===== Floating Add Button ===== */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--tab-active);
+  color: #fff;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(31,111,235,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  z-index: 100;
+}
+.fab:hover { transform: scale(1.1); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 400px;
+  max-width: calc(100% - 32px);
+}
+.modal h3 {
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+.modal label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+.modal label:first-of-type { margin-top: 0; }
+.modal select, .modal input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.modal select:focus, .modal input:focus {
+  border-color: var(--accent-blue);
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.modal-actions button {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+}
+#modal-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+#modal-save {
+  background: #238636;
+  color: #fff;
+}
+#modal-save:hover { background: #2ea043; }
+
+/* ===== Footer ===== */
+footer {
+  text-align: center;
+  padding: 16px 32px;
+  border-top: 1px solid #21262d;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 20px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  header { padding: 16px; }
+  nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 8px 16px;
+  }
+  .tab { padding: 8px 16px; font-size: 13px; }
+  .tab-panel { padding: 16px; }
+  .card { padding: 10px 14px; }
+  .card-actions { opacity: 1; }
+  .modal { width: calc(100% - 32px); padding: 20px; }
+  .fab { bottom: 16px; right: 16px; width: 48px; height: 48px; font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <h1>guozikang</h1>
+  <p class="tagline">&gt; 开发者 · 终身学习者</p>
+</header>
+
+<!-- Tab Navigation -->
+<nav>
+  <button class="tab active" data-category="school" onclick="switchTab('school')">🎓 学校</button>
+  <button class="tab" data-category="work" onclick="switchTab('work')">💼 工作</button>
+  <button class="tab" data-category="life" onclick="switchTab('life')">🌈 生活</button>
+</nav>
+
+<!-- Content -->
+<main>
+  <section id="tab-school" class="tab-panel active">
+    <div class="sub-section" id="school-links">
+      <h3>🔗 外部链接</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="sub-section" id="school-projects">
+      <h3>🐙 我的项目</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="empty-state" id="school-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
+  </section>
+
+  <section id="tab-work" class="tab-panel">
+    <div class="sub-section" id="work-links">
+      <h3>🔗 外部链接</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="sub-section" id="work-projects">
+      <h3>🐙 我的项目</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="empty-state" id="work-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
+  </section>
+
+  <section id="tab-life" class="tab-panel">
+    <div class="sub-section" id="life-links">
+      <h3>🔗 外部链接</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="sub-section" id="life-projects">
+      <h3>🐙 我的项目</h3>
+      <div class="card-list"></div>
+    </div>
+    <div class="empty-state" id="life-empty" style="display:none;">暂无内容，点击右下角 + 添加链接</div>
+  </section>
+</main>
+
+<!-- Floating Add Button -->
+<button id="add-btn" class="fab" title="添加链接" onclick="openAddModal()">+</button>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h3 id="modal-title">➕ 添加链接</h3>
+    <label for="modal-category">所属分类</label>
+    <select id="modal-category">
+      <option value="school">🎓 学校</option>
+      <option value="work">💼 工作</option>
+      <option value="life">🌈 生活</option>
+    </select>
+    <label for="modal-type">类型</label>
+    <select id="modal-type">
+      <option value="links">🔗 外部链接</option>
+      <option value="projects">🐙 我的项目</option>
+    </select>
+    <label for="modal-name">名称</label>
+    <input id="modal-name" type="text" placeholder="链接名称" required>
+    <label for="modal-url">URL</label>
+    <input id="modal-url" type="text" placeholder="https://..." required>
+    <div class="modal-actions">
+      <button id="modal-cancel" type="button" onclick="closeModal()">取消</button>
+      <button id="modal-save" type="button" onclick="handleSave()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <span>© 2026 guozikang</span>
+  <button onclick="exportData()" style="background:none;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:11px;margin-left:8px;">📋 导出数据</button>
+</footer>
+
+<script>
+// ===== Data =====
+const defaultData = {
+  school: {
+    links: [
+      { id: 's1', name: '教务管理系统', url: 'https://example.edu.cn/jwc', addedByUser: false },
+      { id: 's2', name: '学校图书馆',   url: 'https://example.edu.cn/lib', addedByUser: false },
+      { id: 's3', name: 'Google Drive', url: 'https://drive.google.com/drive/home', addedByUser: false },
+      { id: 's4', name: 'IELTS', url: 'https://ieltsregistration.britishcouncil.org/', addedByUser: false },
+      { id: 's5', name: 'Lingnan Portal', url: 'https://www.ln.edu.hk/itsc/services/teaching-learning-research-services/elearning-on-moodle', addedByUser: false },
+    ],
+    projects: [
+      { id: 'sp1', name: 'course-helper', url: 'https://github.com/guozikang/course-helper', addedByUser: false },
+    ],
+  },
+  work: {
+    links: [],
+    projects: [],
+  },
+  life: {
+    links: [],
+    projects: [],
+  },
+};
+
+let currentData = null;
+let currentTab = 'school';
+let editingId = null;
+
+// ===== localStorage =====
+function saveData() {
+  localStorage.setItem('siteData', JSON.stringify(currentData));
+}
+
+function mergeData(defaults, saved) {
+  const result = JSON.parse(JSON.stringify(defaults));
+  for (const cat of ['school', 'work', 'life']) {
+    for (const type of ['links', 'projects']) {
+      const savedItems = saved[cat]?.[type] || [];
+      const userItems = savedItems.filter(item => item.addedByUser === true);
+      result[cat][type] = [...result[cat][type], ...userItems];
+    }
+  }
+  return result;
+}
+
+function loadData() {
+  const saved = localStorage.getItem('siteData');
+  if (!saved) return JSON.parse(JSON.stringify(defaultData));
+  const parsed = JSON.parse(saved);
+  return mergeData(defaultData, parsed);
+}
+
+// ===== Tab Switching =====
+function switchTab(category) {
+  currentTab = category;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-category="${category}"]`).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${category}`).classList.add('active');
+}
+
+// ===== Card Rendering =====
+function renderCard(item, type) {
+  const icon = type === 'project' ? '🐙' : '🔗';
+  const tagHtml = type === 'project'
+    ? '<span class="card-tag project">GitHub</span>'
+    : '';
+  const arrowHtml = type === 'link'
+    ? '<span class="card-arrow">↗</span>'
+    : '';
+  return `
+    <a class="card" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" data-id="${escapeHtml(item.id)}">
+      <span class="card-icon">${icon}</span>
+      <div class="card-body">
+        <span class="card-name">${escapeHtml(item.name)}</span>
+        <span class="card-url">${escapeHtml(item.url)}</span>
+      </div>
+      ${tagHtml}
+      ${arrowHtml}
+      <div class="card-actions" onclick="event.stopPropagation(); event.preventDefault();">
+        <button class="btn-edit" data-id="${escapeHtml(item.id)}">✏️</button>
+        <button class="btn-delete" data-id="${escapeHtml(item.id)}">🗑️</button>
+      </div>
+    </a>`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function findItem(id) {
+  for (const cat of ['school', 'work', 'life']) {
+    for (const type of ['links', 'projects']) {
+      const idx = currentData[cat][type].findIndex(item => item.id === id);
+      if (idx !== -1) return { cat, type, idx, item: currentData[cat][type][idx] };
+    }
+  }
+  return null;
+}
+
+function renderCategory(category) {
+  const data = currentData[category];
+  let hasAny = false;
+
+  // Render links
+  const linksSection = document.getElementById(`${category}-links`);
+  const linksList = linksSection.querySelector('.card-list');
+  if (data.links.length === 0) {
+    linksSection.classList.add('empty');
+  } else {
+    linksSection.classList.remove('empty');
+    linksList.innerHTML = data.links.map(item => renderCard(item, 'link')).join('');
+    hasAny = true;
+    // Bind edit/delete events
+    bindCardActions(linksList);
+  }
+
+  // Render projects
+  const projectsSection = document.getElementById(`${category}-projects`);
+  const projectsList = projectsSection.querySelector('.card-list');
+  if (data.projects.length === 0) {
+    projectsSection.classList.add('empty');
+  } else {
+    projectsSection.classList.remove('empty');
+    projectsList.innerHTML = data.projects.map(item => renderCard(item, 'project')).join('');
+    hasAny = true;
+    bindCardActions(projectsList);
+  }
+
+  // Empty state
+  const emptyEl = document.getElementById(`${category}-empty`);
+  emptyEl.style.display = hasAny ? 'none' : 'block';
+}
+
+function bindCardActions(listEl) {
+  listEl.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      openEditModal(btn.dataset.id);
+    });
+  });
+  listEl.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      deleteItem(btn.dataset.id);
+    });
+  });
+}
+
+function renderAll() {
+  for (const cat of ['school', 'work', 'life']) {
+    renderCategory(cat);
+  }
+}
+
+// ===== Modal =====
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '➕ 添加链接';
+  document.getElementById('modal-category').value = currentTab;
+  document.getElementById('modal-type').value = 'links';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-url').value = '';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openEditModal(id) {
+  const found = findItem(id);
+  if (!found) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = '✏️ 编辑链接';
+  document.getElementById('modal-category').value = found.cat;
+  document.getElementById('modal-type').value = found.type;
+  document.getElementById('modal-name').value = found.item.name;
+  document.getElementById('modal-url').value = found.item.url;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+  editingId = null;
+}
+
+function handleSave() {
+  const category = document.getElementById('modal-category').value;
+  const type = document.getElementById('modal-type').value;
+  const name = document.getElementById('modal-name').value.trim();
+  const url = document.getElementById('modal-url').value.trim();
+
+  if (!name || !url) {
+    alert('请填写名称和 URL');
+    return;
+  }
+
+  if (editingId) {
+    // Edit existing
+    const found = findItem(editingId);
+    if (found) {
+      const oldCat = found.cat;
+      const oldType = found.type;
+      const oldIdx = found.idx;
+      // Remove from old location
+      currentData[oldCat][oldType].splice(oldIdx, 1);
+      // If editing a preset item, mark as user-modified
+      if (!found.item.addedByUser) {
+        found.item.addedByUser = true;
+      }
+      // Update fields
+      found.item.name = name;
+      found.item.url = url;
+      // Add to new location
+      currentData[category][type].push(found.item);
+      // Re-render old location if different
+      if (oldCat !== category || oldType !== type) {
+        renderCategory(oldCat);
+      }
+    }
+  } else {
+    // Add new
+    const newItem = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name,
+      url: url,
+      addedByUser: true,
+    };
+    currentData[category][type].push(newItem);
+  }
+
+  saveData();
+  renderCategory(category);
+  closeModal();
+}
+
+function deleteItem(id) {
+  if (!confirm('确定删除这条链接？')) return;
+  const found = findItem(id);
+  if (!found) return;
+  currentData[found.cat][found.type].splice(found.idx, 1);
+  saveData();
+  renderCategory(found.cat);
+}
+
+// Overlay click to close
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ===== Export =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "site-data.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ===== Init =====
+currentData = loadData();
+renderAll();
+switchTab('school');
+</script>
+
+</body>
+</html>
