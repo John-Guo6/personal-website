@@ -308,7 +308,7 @@ footer button {
 </div>
 
 <!-- Subcategory Add/Rename Modal -->
-<div id="modal-subcat" class="modal-overlay hidden">
+<div id="modal-subcat-editor" class="modal-overlay hidden">
   <div class="modal">
     <h3 id="subcat-modal-title">➕ 新增子分类</h3>
     <label for="subcat-name-input">子分类名称</label>
@@ -643,7 +643,7 @@ function openAddSubcatModal(category) {
   pendingSubcatEditId = null;
   document.getElementById('subcat-modal-title').textContent = '➕ 新增子分类';
   document.getElementById('subcat-name-input').value = '';
-  document.getElementById('modal-subcat').classList.remove('hidden');
+  document.getElementById('modal-subcat-editor').classList.remove('hidden');
 }
 
 function openRenameSubcat(category, scId) {
@@ -653,11 +653,11 @@ function openRenameSubcat(category, scId) {
   pendingSubcatEditId = scId;
   document.getElementById('subcat-modal-title').textContent = '✏️ 重命名子分类';
   document.getElementById('subcat-name-input').value = sc.name;
-  document.getElementById('modal-subcat').classList.remove('hidden');
+  document.getElementById('modal-subcat-editor').classList.remove('hidden');
 }
 
 function closeSubcatModal() {
-  document.getElementById('modal-subcat').classList.add('hidden');
+  document.getElementById('modal-subcat-editor').classList.add('hidden');
   pendingSubcatCategory = null;
   pendingSubcatEditId = null;
 }
@@ -885,7 +885,7 @@ document.getElementById('modal-main').addEventListener('click', function(e) {
 document.getElementById('modal-dedup').addEventListener('click', function(e) {
   if (e.target === this) { pendingDedupName = null; this.classList.add('hidden'); }
 });
-document.getElementById('modal-subcat').addEventListener('click', function(e) {
+document.getElementById('modal-subcat-editor').addEventListener('click', function(e) {
   if (e.target === this) closeSubcatModal();
 });
 
