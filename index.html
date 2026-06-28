@@ -577,7 +577,7 @@ function renderCategory(category) {
     const isFirst = i === 0;
     const isLast = i === sortedScs.length - 1;
 
-    html += '<div class="subcat" data-subcat-id="' + sc.id + '" data-cat="' + category + '" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">';
+    html += '<div class="subcat" data-subcat-id="' + sc.id + '" data-cat="' + category + '" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">';
     html += renderSubcatHeader(sc, category, isFirst, isLast);
 
     // Links
@@ -665,6 +665,7 @@ var dragSourceCat = null;
 var dragSourceScId = null;
 var dragSourceType = null;
 var dragItemData = null;
+var dragHighlightEl = null;
 
 function handleDragStart(e, id, cat, scId, type, item) {
   dragItemId = id;
@@ -679,25 +680,49 @@ function handleDragStart(e, id, cat, scId, type, item) {
 
 function handleDragEnd(e) {
   this.classList.remove('dragging');
-  document.querySelectorAll('.subcat.drop-target').forEach(el => el.classList.remove('drop-target'));
+  clearDragHighlight();
+}
+
+function clearDragHighlight() {
+  if (dragHighlightEl) {
+    dragHighlightEl.classList.remove('drop-target');
+    dragHighlightEl = null;
+  }
 }
 
 function handleDragOver(e) {
   e.preventDefault();
+  e.stopPropagation();
   e.dataTransfer.dropEffect = 'move';
-  this.classList.add('drop-target');
-}
 
-function handleDragLeave(e) {
-  this.classList.remove('drop-target');
+  // Find the .subcat ancestor
+  var el = e.currentTarget || this;
+  while (el && !el.classList.contains('subcat')) {
+    el = el.parentElement;
+  }
+  if (!el) return;
+
+  if (dragHighlightEl !== el) {
+    clearDragHighlight();
+    dragHighlightEl = el;
+    el.classList.add('drop-target');
+  }
 }
 
 function handleDrop(e) {
   e.preventDefault();
-  this.classList.remove('drop-target');
+  e.stopPropagation();
+  clearDragHighlight();
 
-  const targetCat = this.dataset.cat;
-  const targetScId = this.dataset.subcatId;
+  // Find the .subcat ancestor
+  var el = e.currentTarget;
+  while (el && !el.classList.contains('subcat')) {
+    el = el.parentElement;
+  }
+  if (!el) return;
+
+  var targetCat = el.dataset.cat;
+  var targetScId = el.dataset.subcatId;
 
   if (!dragItemId || !dragItemData) return;
 
@@ -708,14 +733,14 @@ function handleDrop(e) {
   if (dragSourceCat !== targetCat) return;
 
   // Remove from source
-  const sourceSc = findSubcategory(dragSourceCat, dragSourceScId);
+  var sourceSc = findSubcategory(dragSourceCat, dragSourceScId);
   if (sourceSc) {
-    const idx = sourceSc[dragSourceType].findIndex(item => item.id === dragItemId);
+    var idx = sourceSc[dragSourceType].findIndex(function(item) { return item.id === dragItemId; });
     if (idx !== -1) sourceSc[dragSourceType].splice(idx, 1);
   }
 
   // Add to target
-  const targetSc = findSubcategory(targetCat, targetScId);
+  var targetSc = findSubcategory(targetCat, targetScId);
   if (targetSc) {
     targetSc[dragSourceType].push(dragItemData);
   }
