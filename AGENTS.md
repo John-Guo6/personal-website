@@ -70,3 +70,17 @@ content[:idx] + replacement + content[end_idx:]
 - localStorage key 升级时保留旧 key 的回退读取
 - `mergeData` 只合并 `addedByUser: true` 的项（预设项不覆盖用户数据）
 - 预设项（`addedByUser: false`）在 `mergeData` 中每次从 `defaultData` 恢复，不可真正删除
+
+---
+
+## 错误记录
+
+| # | 日期 | 错误表象 | 根因 | 修复方式 |
+|---|------|---------|------|---------|
+| 1 | 2026-06-29 | 子分类弹窗点击无反应 | `<select id="modal-subcat">` 和 `<div id="modal-subcat">` ID 重复，getElementById 只返回第一个 | 弹窗改名 `modal-subcat-editor` |
+| 2 | 2026-06-29 | 新增/编辑/导出/导入全部失效，21个函数丢失 | Python `content[:idx]+replacement+content[end_idx:]` 替换范围过大，误删中间所有函数 | 精准字符串匹配替换，替换后立即 grep 验证 |
+| 3 | 2026-06-29 | `renderAll is not defined` 页面初始化崩溃 | `renderAll` 在误删范围内，被3处调用但无定义 | 补回 renderAll 函数定义 |
+| 4 | 2026-06-29 | 拖拽 hover 高亮闪烁，无法放入子分类 | `dragleave` 在进入子元素时误触发清除高亮 | 去掉 dragleave，仅用 dragend/drop 清除 |
+| 5 | 2026-06-29 | 拖拽 drop 时报 `Cannot read properties of undefined (reading 'findIndex')` | `data-type` 存单数 `'link'`，但数组键名是复数 `sc.links` | `renderCard` 统一使用复数 `'links'/'projects'` |
+| 6 | 2026-06-29 | `<a>` 标签默认拖拽行为干扰 HTML5 DnD | `<a href>` 有原生链接拖拽，与 `draggable="true"` 冲突 | 卡片加 `draggable="false"`，仅 `⠿` 手柄可拖 |
+| 7 | 2026-06-29 | 拖拽 re-render 后 dragstart 监听器丢失 | `addEventListener` 绑在卡片元素上，innerHTML 替换后销毁 | 改用 panel 级事件委托，`e.target.closest('.card')` 查找 |
