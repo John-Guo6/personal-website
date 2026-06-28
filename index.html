@@ -117,6 +117,16 @@ main {
 }
 .card-tag.project { color: var(--accent-green); }
 .card-arrow { color: var(--text-secondary); font-size: 16px; flex-shrink: 0; }
+/* Drag handle */
+.card-handle {
+  display: none; cursor: grab; font-size: 14px; color: var(--text-muted);
+  flex-shrink: 0; padding: 0 2px; user-select: none;
+}
+.card:hover .card-handle { display: block; }
+.card.dragging { opacity: 0.4; }
+/* Drop zone highlight */
+.subcat.drop-target { outline: 2px dashed var(--accent-blue); outline-offset: 2px; border-radius: 4px; }
+.subcat.drop-target .subcat-header { border-color: var(--accent-blue); }
 .card-actions { opacity: 0; display: flex; gap: 2px; transition: opacity 0.2s; flex-shrink: 0; }
 .card:hover .card-actions { opacity: 1; }
 .btn-eye, .btn-edit, .btn-delete {
@@ -510,7 +520,7 @@ function isUrlDuplicate(url, excludeId) {
 }
 
 // ===== Card Rendering =====
-function renderCard(item, type) {
+function renderCard(item, type, cat, scId) {
   const icon = type === 'project' ? '🐙' : '🔗';
   const tagHtml = type === 'project'
     ? '<span class="card-tag project">GitHub</span>' : '';
@@ -521,7 +531,9 @@ function renderCard(item, type) {
   const nameDisplay = item.showName ? escapeHtml(item.name) : '***';
   const eyeIcon = item.showName ? '👁️' : '👁️‍🗨️';
 
-  return '<a class="card" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer" data-id="' + escapeHtml(item.id) + '">'
+  return '<a class="card" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer" '
+    + 'draggable="true" data-id="' + escapeHtml(item.id) + '" data-cat="' + cat + '" data-subcat-id="' + scId + '" data-type="' + type + '">'
+    + '<span class="card-handle" title="拖拽移动">⠿</span>'
     + '<span class="card-icon">' + icon + '</span>'
     + '<div class="card-body">'
     + '<span class="card-name' + nameClass + '">' + nameDisplay + '</span>'
@@ -565,14 +577,14 @@ function renderCategory(category) {
     const isFirst = i === 0;
     const isLast = i === sortedScs.length - 1;
 
-    html += '<div class="subcat" data-subcat-id="' + sc.id + '">';
+    html += '<div class="subcat" data-subcat-id="' + sc.id + '" data-cat="' + category + '" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">';
     html += renderSubcatHeader(sc, category, isFirst, isLast);
 
     // Links
     const hasLinks = sc.links.length > 0;
     if (hasLinks) {
       html += '<div class="subcat-type-label">🔗 外部链接</div>';
-      html += sc.links.map(item => renderCard(item, 'link')).join('');
+      html += sc.links.map(item => renderCard(item, 'link', category, sc.id)).join('');
       hasAnyItem = true;
     }
 
@@ -580,7 +592,7 @@ function renderCategory(category) {
     const hasProjects = sc.projects.length > 0;
     if (hasProjects) {
       html += '<div class="subcat-type-label">🐙 我的项目</div>';
-      html += sc.projects.map(item => renderCard(item, 'project')).join('');
+      html += sc.projects.map(item => renderCard(item, 'project', category, sc.id)).join('');
       hasAnyItem = true;
     }
 
@@ -602,6 +614,20 @@ function renderCategory(category) {
 }
 
 function bindCardEvents(panel) {
+  // Drag events on cards
+  panel.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('dragstart', function(e) {
+      const id = this.dataset.id;
+      const cat = this.dataset.cat;
+      const scId = this.dataset.subcatId;
+      const type = this.dataset.type;
+      const found = findItem(id);
+      if (!found) return;
+      handleDragStart.call(this, e, id, cat, scId, type, found.item);
+    });
+    card.addEventListener('dragend', handleDragEnd);
+  });
+
   panel.querySelectorAll('.btn-eye').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -631,6 +657,77 @@ function toggleShowName(id) {
   found.item.showName = !found.item.showName;
   saveData();
   renderCategory(found.cat);
+}
+
+// ===== Drag & Drop =====
+var dragItemId = null;
+var dragSourceCat = null;
+var dragSourceScId = null;
+var dragSourceType = null;
+var dragItemData = null;
+
+function handleDragStart(e, id, cat, scId, type, item) {
+  dragItemId = id;
+  dragSourceCat = cat;
+  dragSourceScId = scId;
+  dragSourceType = type;
+  dragItemData = item;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+  document.querySelectorAll('.subcat.drop-target').forEach(el => el.classList.remove('drop-target'));
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.classList.add('drop-target');
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('drop-target');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  this.classList.remove('drop-target');
+
+  const targetCat = this.dataset.cat;
+  const targetScId = this.dataset.subcatId;
+
+  if (!dragItemId || !dragItemData) return;
+
+  // Same subcategory, no-op
+  if (dragSourceCat === targetCat && dragSourceScId === targetScId) return;
+
+  // Only allow same main category
+  if (dragSourceCat !== targetCat) return;
+
+  // Remove from source
+  const sourceSc = findSubcategory(dragSourceCat, dragSourceScId);
+  if (sourceSc) {
+    const idx = sourceSc[dragSourceType].findIndex(item => item.id === dragItemId);
+    if (idx !== -1) sourceSc[dragSourceType].splice(idx, 1);
+  }
+
+  // Add to target
+  const targetSc = findSubcategory(targetCat, targetScId);
+  if (targetSc) {
+    targetSc[dragSourceType].push(dragItemData);
+  }
+
+  dragItemId = null;
+  dragSourceCat = null;
+  dragSourceScId = null;
+  dragSourceType = null;
+  dragItemData = null;
+
+  saveData();
+  renderCategory(targetCat);
 }
 
 function renderAll() {
