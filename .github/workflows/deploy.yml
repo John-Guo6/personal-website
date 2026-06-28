@@ -37,4 +37,4 @@ jobs:
             --file index.html \
             --name index.html \
             --force \
-            --namespace ax9xub0hkknv
+            --content-type text/html --cache-control "no-cache" --namespace ax9xub0hkknv
